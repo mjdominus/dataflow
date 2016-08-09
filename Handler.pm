@@ -14,7 +14,7 @@ sub make_constant {
     for my $out (values %$o) {
       unless ($out->is_full) {
         print $self->name . ": emmitting constant $c\n";
-        $out->queue_token($c);
+        $out->put_token($c);
         $self->notify;
       }
     };
@@ -34,10 +34,10 @@ sub adder {
 
   my $s = 0;
   for my $in (values %$i) {
-    $s += $in->pop_token;
+    $s += $in->get_token;
   }
   print $self->name . ": adding; result=$s\n";
-  $out->queue_token($s);
+  $out->put_token($s);
 }
 
 sub subtracter {
@@ -48,12 +48,12 @@ sub subtracter {
   return if $i->{input1}->is_empty;
   return if $out->is_full;
 
-  my $s0 = $i->{input0}->pop_token;
-  my $s1 = $i->{input1}->pop_token;
+  my $s0 = $i->{input0}->get_token;
+  my $s1 = $i->{input1}->get_token;
   my $d = $s0 - $s1;
 
   print $self->name . ": subtracting; result=$d\n";
-  $out->queue_token($d);
+  $out->put_token($d);
 }
 
 sub make_input {
@@ -65,7 +65,7 @@ sub make_input {
     print "$prompt> ";
     chomp(my $input = <>);
     return if $input eq "none" || $input eq "";
-    $out->queue_token($input);
+    $out->put_token($input);
 #    $self->notify;
   }
 }
@@ -76,7 +76,7 @@ sub make_output {
     my (undef, $i, undef) = @_;
     my ($in) = values %$i;
     return if $in->is_empty;
-    my $tok = $in->pop_token();
+    my $tok = $in->get_token();
     print "*** $label: $tok\n";
   };
 }

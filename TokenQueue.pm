@@ -38,14 +38,14 @@ sub croak {
   Carp::croak($msg);
 }
 
-sub queue_token {
+sub put_token {
   my ($self, $token) = @_;
   $self->croak("is full") if $self->is_full;
   push @{$self->queue}, $token;
   $self->target->notify;
 }
 
-sub pop_token {
+sub get_token {
   my ($self) = @_;
   $self->croak("is empty") if $self->is_empty;
   my $token = pop @{$self->queue};
