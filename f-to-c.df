@@ -1,0 +1,19 @@
+
+* f: make_input Fahrenheit
+* c: make_output Celsius
+* con32: make_constant 32
+* con9: make_constant 9
+* con5: make_constant 5
+* frac: divider
+* sub: subtracter
+* mul: multiplier
+
+- con5 - frac[input0]
+- con9 - frac[input1]
+
+- f - sub[input0]
+- sub - mul - c
+- frac - mul
+- con32 - sub[input1]
+
+! con32 f con9 con5

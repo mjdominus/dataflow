@@ -56,6 +56,20 @@ sub subtracter {
   $out->put_token($d);
 }
 
+sub multiplier {
+  my ($self, $i, $o) = @_;
+  my ($out) = values %$o;
+
+  return if $i->{input0}->is_empty;
+  return if $i->{input1}->is_empty;
+  return if $out->is_full;
+
+  my $prod = $i->{input0}->get_token * $i->{input1}->get_token;
+
+  $self->announce("multiplying; result=$prod");
+  $out->put_token($prod);
+}
+
 sub make_input {
   my ($prompt) = @_;
   sub {
@@ -68,6 +82,23 @@ sub make_input {
     $out->put_token($input);
 #    $self->notify;
   }
+}
+
+sub divider {
+  my ($self, $i, $o) = @_;
+  my ($out) = values %$o;
+
+  return if $i->{input0}->is_empty;
+  return if $i->{input1}->is_empty;
+  return if $out->is_full;
+
+  my $s0 = $i->{input0}->get_token;
+  my $s1 = $i->{input1}->get_token;
+  die "Division by zero\n" if $s1 == 0;
+  my $q = $s0 / $s1;
+
+  $self->announce("result=$q");
+  $out->put_token($q);
 }
 
 sub make_output {
