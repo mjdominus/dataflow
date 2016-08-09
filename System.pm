@@ -6,6 +6,11 @@ use Handler ();
 use Component;
 use TokenQueue;
 
+has debug => (
+  is => 'rw',
+  default => 0,
+);
+
 has components => (
   is => 'ro',
   isa => sub { reftype $_[0] eq "HASH" },
@@ -35,7 +40,7 @@ has agenda => (
 sub schedule {
   my ($self, @components) = @_;
   for my $component (@components) {
-    print "System: scheduling " . $component->name . "\n";
+    $self->sys_announce("scheduling " . $component->name);
   }
   push @{$self->agenda}, @components;
 }
@@ -49,14 +54,19 @@ sub run_one_step {
   my ($self) = @_;
   my ($next) = pop @{$self->agenda};
   return unless defined $next;
-  $self->announce("Running " . $next->name);
+  $self->sys_announce("running " . $next->name);
   $next->activate();
   return 1;
 }
 
-sub announce {
+sub sys_announce {
   my ($self, @msg) = @_;
-  print "System: $_\n" for @msg;
+  $self->announce("System", @msg) if $self->debug;
+}
+
+sub announce {
+  my ($self, $who, @msg) = @_;
+  print "$who: $_\n" for @msg;
 }
 
 1;

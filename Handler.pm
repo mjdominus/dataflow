@@ -13,7 +13,7 @@ sub make_constant {
     my ($self, undef, $o) = @_;
     for my $out (values %$o) {
       unless ($out->is_full) {
-        print $self->name . ": emmitting constant $c\n";
+        $self->announce("emitting constant $c");
         $out->put_token($c);
         $self->notify;
       }
@@ -36,7 +36,7 @@ sub adder {
   for my $in (values %$i) {
     $s += $in->get_token;
   }
-  print $self->name . ": adding; result=$s\n";
+  $self->announce("result=$s");
   $out->put_token($s);
 }
 
@@ -52,7 +52,7 @@ sub subtracter {
   my $s1 = $i->{input1}->get_token;
   my $d = $s0 - $s1;
 
-  print $self->name . ": subtracting; result=$d\n";
+  $self->announce("result=$d");
   $out->put_token($d);
 }
 

@@ -6,6 +6,11 @@ use Util;
 
 use System;
 
+has debug => (
+  is => 'rw',
+  default => 0,
+);
+
 has name => (
   is => 'ro',
   isa => sub { not defined ref $_[0] },
@@ -70,6 +75,12 @@ sub notify {
 sub activate {
   my ($self) = @_;
   $self->handler->($self, $self->input, $self->output);
+}
+
+sub announce {
+  my ($self, @msg) = @_;
+  return unless $self->debug;
+  $self->system->announce($self->name, @msg);
 }
 
 1;
