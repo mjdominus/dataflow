@@ -1,4 +1,4 @@
-package Handlers;
+package Handler;
 use base Exporter;
 
 our %EXPORT_TAGS = (all => [qw(adder

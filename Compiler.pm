@@ -75,7 +75,7 @@ sub handle_component {
   my ($system, $line) = @_;
   my ($name, $funargs) = $line =~ /(\w+):\s*(.*)/;
   my ($func, @args) = split /\s+/, $funargs;
-  my $h_func = "Handlers::$func";
+  my $h_func = "Handler::$func";
   no strict 'refs';
   not defined(&$h_func) and do {
     warn "Unknown handler function '$func' in definition of component '$name'\n";

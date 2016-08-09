@@ -2,7 +2,7 @@ package System;
 use Moo;
 use Scalar::Util qw(reftype);
 use namespace::clean;
-use Handlers ();
+use Handler ();
 use Component;
 use TokenQueue;
 
