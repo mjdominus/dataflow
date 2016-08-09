@@ -1,0 +1,13 @@
+
+* in:    make_input input
+* three: make_constant 3
+* sub:   subtracter
+* out:   make_output output    
+
+- in - sub[input0]
+- sub - out
+- three[output0] - sub[input1]
+
+! in three
+
+

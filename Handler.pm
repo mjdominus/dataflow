@@ -40,6 +40,22 @@ sub adder {
   $out->queue_token($s);
 }
 
+sub subtracter {
+  my ($self, $i, $o) = @_;
+  my ($out) = values %$o;
+
+  return if $i->{input0}->is_empty;
+  return if $i->{input1}->is_empty;
+  return if $out->is_full;
+
+  my $s0 = $i->{input0}->pop_token;
+  my $s1 = $i->{input1}->pop_token;
+  my $d = $s0 - $s1;
+
+  print $self->name . ": subtracting; result=$d\n";
+  $out->queue_token($d);
+}
+
 sub make_input {
   my ($prompt) = @_;
   sub {
