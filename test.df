@@ -1,0 +1,12 @@
+
+* in:    make_input input
+* three: make_constant 3
+* add:   adder
+* out:   make_output output    
+
+- in - add - out
+- three - add
+
+! in three
+
+
