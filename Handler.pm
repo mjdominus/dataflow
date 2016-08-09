@@ -77,10 +77,9 @@ sub make_input {
     my ($out) = values %$o;
     return if $out->is_full;
     print "$prompt> ";
-    chomp(my $input = <>);
+    chomp(my $input = <STDIN>);
     return if $input eq "none" || $input eq "";
     $out->put_token($input);
-#    $self->notify;
   }
 }
 
