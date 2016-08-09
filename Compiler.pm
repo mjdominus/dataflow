@@ -52,17 +52,21 @@ sub handle_connection {
   my $BAD = 0;
   my @words = split /\s*-\s*/, $line;
   for my $i (0 .. $#words - 1) {
-    my $c1 = $system->component($words[$i]);
-    my $c2 = $system->component($words[$i+1]);
+    my ($c1_name, $c1_queue_name) = $words[$i]   =~ /(\w+)(?:\[(\w+)\])?/;
+    my ($c2_name, $c2_queue_name) = $words[$i+1] =~ /(\w+)(?:\[(\w+)\])?/;
+    my $c1 = $system->component($c1_name);
+    my $c2 = $system->component($c2_name);
     $i == 0 && not defined $c1 and do {
-      warn "Unknown component '$words[$i]' in wiring line '$line'\n";
+      warn "Unknown component '$c1_name' in wiring line '$line'\n";
       $BAD++;
     };
     not defined $c2 and do {
-      warn "Unknown component '$words[$i+1]' in wiring line '$line'\n";
+      warn "Unknown component '$c2_name' in wiring line '$line'\n";
       $BAD++;
     };
-    attach($c1, $c2) unless $BAD;
+    attach($c1_queue_name ? [$c1, $c1_queue_name] : $c1,
+           $c2_queue_name ? [$c2, $c2_queue_name] : $c2,
+          ) unless $BAD;
   }
   return $BAD == 0;
 }
