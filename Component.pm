@@ -17,16 +17,16 @@ has name => (
 );
 
 has name_counter => (
-  is => 'rwp',
-  default => sub { 0 },
+  is => 'ro',
+  isa => sub { reftype $_[0] eq "HASH" },
+  default => sub { {} },
 );
 
 sub gen_name {
   my ($self, $prefix) = @_;
-  my $counter = $self->name_counter;
-  $self->_set_name_counter($counter + 1);
   $prefix //= "port";
-  return "$prefix$counter";
+  my $n = $self->name_counter->{$prefix}++;
+  return "$prefix$n";
 }
 
 has system => (
