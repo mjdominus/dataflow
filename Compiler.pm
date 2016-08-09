@@ -25,54 +25,78 @@ sub load_spec {
   return $OK && $system;
 }
 
-# Bleh, use dispatch table
+my %line_handler = ('-' => \&handle_connection,
+                    '*' => \&handle_component,
+                    '!' => \&handle_schedule,
+                   );
+
 sub load_line {
   my ($self, $system, $line) = @_;
-  my $BAD = 0;
+
   return 1 unless $line =~ /\S/;
-  if ($line =~ s/^-\s*//) {
-    my @words = split /\s*-\s*/, $line;
-    for my $i (0 .. $#words - 1) {
-      my $c1 = $system->component($words[$i]);
-      my $c2 = $system->component($words[$i+1]);
-      not defined $c1 and do {
-        warn "Unknown component '$words[$i]' in wiring line '$line'\n";
-        $BAD++;
-      };
-      not defined $c2 and do {
-        warn "Unknown component '$words[$i+1]' in wiring line '$line'\n";
-        $BAD++;
-      };
-      return if $BAD;
-      attach($c1, $c2);
-    }
-  } elsif ($line =~ s/^\*\s*//) {
-    my ($name, $funargs) = $line =~ /(\w+):\s*(.*)/;
-    my ($func, @args) = split /\s+/, $funargs;
-    my $h_func = "Handlers::$func";
-    no strict 'refs';
-    not defined(&$h_func) and do {
-      warn "Unknown handler function '$func' in definition of component '$name'\n";
+  unless ($line =~ /^\s*(\S)\s/) {
+    warn sprintf "Malformed line starts with '%s'\n", substr($line, 0, 2);
+    return;
+  }
+  my $c = $1;
+  my $handler = $line_handler{$c} or do {
+    warn "Unrecognized selector character '$c'\n";
+    return;
+  };
+  $line =~ s/^\s*(\S)\s//;
+  return $handler->($system, $line);
+}
+
+sub handle_connection {
+  my ($system, $line) = @_;
+  my $BAD = 0;
+  my @words = split /\s*-\s*/, $line;
+  for my $i (0 .. $#words - 1) {
+    my $c1 = $system->component($words[$i]);
+    my $c2 = $system->component($words[$i+1]);
+    $i == 0 && not defined $c1 and do {
+      warn "Unknown component '$words[$i]' in wiring line '$line'\n";
       $BAD++;
     };
-    return if $BAD;
-    my $handler = @args ? $h_func->(@args) : \&$h_func;
-    my $component = Component->new({ name => $name, handler => $handler, system => $system });
-    $system->add_component($name => $component);
-  } elsif ($line =~ s/^!\s*//) {
-    my @names = split /\s+/, $line;
-    for my $name (@names) {
-      my $component = $system->component($name);
-      if (defined $component) {
-        $system->schedule($component);
-      } else {
-        warn "Unknown component '$component' in schedule line\n";
-        $BAD++;
-      };
-    }
-    return if $BAD;
+    not defined $c2 and do {
+      warn "Unknown component '$words[$i+1]' in wiring line '$line'\n";
+      $BAD++;
+    };
+    attach($c1, $c2) unless $BAD;
   }
+  return $BAD == 0;
+}
+
+sub handle_component {
+  my ($system, $line) = @_;
+  my ($name, $funargs) = $line =~ /(\w+):\s*(.*)/;
+  my ($func, @args) = split /\s+/, $funargs;
+  my $h_func = "Handlers::$func";
+  no strict 'refs';
+  not defined(&$h_func) and do {
+    warn "Unknown handler function '$func' in definition of component '$name'\n";
+    return;
+  };
+  my $handler = @args ? $h_func->(@args) : \&$h_func;
+  my $component = Component->new({ name => $name, handler => $handler, system => $system });
+  $system->add_component($name => $component);
   return 1;
+}
+
+sub handle_schedule {
+  my ($system, $line) = @_;
+  my $BAD = 0;
+  my @names = split /\s+/, $line;
+  for my $name (@names) {
+    my $component = $system->component($name);
+    if (defined $component) {
+      $system->schedule($component);
+    } else {
+      warn "Unknown component '$component' in schedule line\n";
+      $BAD++;
+    };
+  }
+  return $BAD == 0;
 }
 
 1;
