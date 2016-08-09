@@ -4,6 +4,8 @@ use Scalar::Util qw(reftype);
 use namespace::clean;
 use Handlers ();
 use Util qw(attach);
+use Component;
+use TokenQueue;
 
 has components => (
   is => 'ro',
@@ -69,6 +71,7 @@ sub load_file {
   open my($fh), "<", $filename
     or die "Couldn't open file '$filename': $!\n";
   $self->load_spec(<$fh>);
+  return $self;
 }
 
 sub load_spec {

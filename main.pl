@@ -1,16 +1,12 @@
 #!/usr/bin/perl
 
 use System;
-use Component;
-use TokenQueue;
 
-my $system = System->new;
+@ARGV or die "Usage: $0 file.df\n";
+my ($input) = @ARGV;
+@ARGV = ();
 
-
-
-
-$system->load_file("test.df");
-$system->run;
+my $system = System->new->load_file($input)->run;
 
 1;
 
