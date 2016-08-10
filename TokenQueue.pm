@@ -41,15 +41,17 @@ sub croak {
 sub put_token {
   my ($self, $token) = @_;
   $self->croak("is full") if $self->is_full;
+  my $was_empty = $self->is_empty;
   push @{$self->queue}, $token;
-  $self->target->notify;
+  $self->target->notify if $was_empty;
 }
 
 sub get_token {
   my ($self) = @_;
   $self->croak("is empty") if $self->is_empty;
+  my $was_full = $self->is_full;
   my $token = pop @{$self->queue};
-  $self->source->notify;
+  $self->source->notify if $was_full;
   return $token;
 }
 

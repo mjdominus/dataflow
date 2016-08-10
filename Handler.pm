@@ -15,7 +15,7 @@ sub make_constant {
       unless ($out->is_full) {
         $self->announce("emitting constant $c");
         $out->put_token($c);
-        $self->notify;
+        $self->notify unless $out->is_full;
       }
     };
   }
@@ -80,6 +80,7 @@ sub make_input {
     chomp(my $input = <STDIN>);
     return if $input eq "none" || $input eq "";
     $out->put_token($input);
+    $self->notify unless $out->is_full;
   }
 }
 
