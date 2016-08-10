@@ -26,6 +26,9 @@ has queue_type => (
   default => sub { 'lifo' },
 );
 
+# if true, the queue may contain more than one instance
+# of each component.  If false, a request to schedule a
+# component that is already in the queue will be ignored
 has allow_duplicates => (
   is => 'rw',
   default => 0,
