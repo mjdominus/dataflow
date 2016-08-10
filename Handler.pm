@@ -21,6 +21,11 @@ sub make_constant {
   }
 }
 
+################################################################
+#
+# Arithmetic
+#
+
 sub adder {
   my ($self, $i, $o) = @_;
   my ($out) = values %$o;
@@ -70,20 +75,6 @@ sub multiplier {
   $out->put_token($prod);
 }
 
-sub make_input {
-  my ($prompt) = @_;
-  sub {
-    my ($self, undef, $o) = @_;
-    my ($out) = values %$o;
-    return if $out->is_full;
-    print "$prompt> ";
-    chomp(my $input = <STDIN>);
-    return if $input eq "none" || $input eq "";
-    $out->put_token($input);
-    $self->notify unless $out->is_full;
-  }
-}
-
 sub divider {
   my ($self, $i, $o) = @_;
   my ($out) = values %$o;
@@ -99,6 +90,25 @@ sub divider {
 
   $self->announce("result=$q");
   $out->put_token($q);
+}
+
+################################################################
+#
+# I/O
+#
+
+sub make_input {
+  my ($prompt) = @_;
+  sub {
+    my ($self, undef, $o) = @_;
+    my ($out) = values %$o;
+    return if $out->is_full;
+    print "$prompt> ";
+    chomp(my $input = <STDIN>);
+    return if $input eq "none" || $input eq "";
+    $out->put_token($input);
+    $self->notify unless $out->is_full;
+  }
 }
 
 sub make_output {
