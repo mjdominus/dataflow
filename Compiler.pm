@@ -1,12 +1,11 @@
 package Compiler;
 use Moo;
-use Util qw(attach);
+use Util qw(attach is_a);
 use namespace::clean;
 
-has system_factory => (
-  is => 'rw',
-  isa => sub { },
-  default => 'System',
+has system => (
+  is => 'ro',
+  isa => sub { is_a($_[0], "System") },
 );
 
 sub load_file {
@@ -19,10 +18,9 @@ sub load_file {
 sub load_spec {
   my ($self, @spec) = @_;
   chomp(@spec);
-  my $system = $self->system_factory->new();
   my $OK = 1;
-  $OK &&= $self->load_line($system, $_) for @spec;
-  return $OK && $system;
+  $OK &&= $self->load_line($_) for @spec;
+  return $OK;
 }
 
 my %line_handler = ('-' => \&handle_connection,
@@ -31,7 +29,7 @@ my %line_handler = ('-' => \&handle_connection,
                    );
 
 sub load_line {
-  my ($self, $system, $line) = @_;
+  my ($self, $line) = @_;
 
   return 1 unless $line =~ /\S/;
   unless ($line =~ /^\s*(\S)\s/) {
@@ -44,7 +42,7 @@ sub load_line {
     return;
   };
   $line =~ s/^\s*(\S)\s//;
-  return $handler->($system, $line);
+  return $handler->($self->system, $line);
 }
 
 sub handle_connection {

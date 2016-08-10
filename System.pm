@@ -3,8 +3,10 @@ use Moo;
 use Scalar::Util qw(reftype);
 use namespace::clean;
 use Handler ();
+use Compiler;
 use Component;
 use TokenQueue;
+use Scheduler::Queue;  # default scheduler
 
 has debug => (
   is => 'rw',
@@ -30,19 +32,62 @@ sub component {
   $self->components->{$name};
 }
 
-has agenda => (
+has compiler_factory => (
   is => 'ro',
-  isa => sub { reftype $_[0] eq "ARRAY" },
-  default => sub { [] },
+  default => sub { "Compiler" },
 );
 
-# Basic queue strategy: Just stick everything in an array
-sub schedule {
-  my ($self, @components) = @_;
-  for my $component (@components) {
-    $self->sys_announce("scheduling " . $component->name);
+has compiler => (
+  is => 'ro',
+  lazy => 1,
+  default => sub { $_[0]->compiler_factory->new({ system => $_[0] }) },
+);
+
+sub load_file {
+  my ($self, @args) = @_;
+  $self->compiler->load_file(@args);
+  return $self;
+}
+
+sub load_spec {
+  my ($self, @args) = @_;
+  $self->compiler->load_spec(@args);
+  return $self;
+}
+
+has scheduler => (
+  is => 'ro',
+  isa => sub {
+    $_[0]->can("schedule") && $_[0]->can("next_scheduled_component");
+  },
+  handles => [ qw(schedule next_scheduled_component) ],
+  lazy => 1,
+  builder => 'build_scheduler',
+);
+
+has scheduler_factory => (
+  is => 'ro',
+  required => 1,
+);
+
+sub build_scheduler {
+  my ($self) = @_;
+  my $factory = $self->scheduler_factory;
+  my $scheduler;
+
+  if (ref $factory eq "CODE") {
+    $scheduler = $factory->($self);
+  } elsif (ref $factory eq "") {
+    $factory = "Scheduler::$factory" unless $factory =~ /^Scheduler::/;
+    $scheduler = $factory->new({ system => $self });
+  } else {
+    $scheduler = $factory->new({ system => $self });
   }
-  push @{$self->agenda}, @components;
+
+  die "Couldn't build scheduler from factory '$factory'"
+    unless defined $scheduler;
+
+  return $scheduler;
 }
 
 sub run {
@@ -52,7 +97,7 @@ sub run {
 
 sub run_one_step {
   my ($self) = @_;
-  my ($next) = pop @{$self->agenda};
+  my $next = $self->next_scheduled_component;
   return unless defined $next;
   $self->sys_announce("running " . $next->name);
   $next->activate();

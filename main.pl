@@ -2,12 +2,26 @@
 
 use System;
 use Compiler;
+use Getopt::Std;
 
-@ARGV or die "Usage: $0 file.df\n";
+my %opt = (s => 'Queue',  # default scheduler is Queue
+           d => '',       # no debugging
+    );
+
+getopts('d:s:', \%opt) or usage();
+
+@ARGV == 1 or die "Usage: $0 [-s scheduler-type] file.df\n";
 my ($input) = @ARGV;
 
-Compiler->new->load_file($input)->run;
+my $system = System->new({ scheduler_factory => $opt{s} })->load_file($input);
 
-1;
+for my $component (split /,\s*/, $opt{d}) {
+  if    ($component eq "system")    { $system                       ->debug(1) }
+  elsif ($component eq "scheduler") { $system->scheduler            ->debug(1) }
+  else                              { $system->component($component)->debug(1) }
+}
+
+$system->scheduler->announce_state;
+$system->run;
 
 
