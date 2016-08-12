@@ -5,8 +5,6 @@
 * out:   make_output output    
 
 - in - add - out
-- three[output0] - add
+- three - add
 
 ! in three
-
-

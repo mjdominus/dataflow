@@ -8,12 +8,12 @@
 * sub: subtracter
 * mul: multiplier
 
-- con5 - frac[input0]
-- con9 - frac[input1]
+- con5 - frac[dividend]
+- con9 - frac[divisor]
 
-- f - sub[input0]
+- f - sub[arg1]
 - sub - mul - c
 - frac - mul
-- con32 - sub[input1]
+- con32 - sub[arg2]
 
 ! con32 f con9 con5

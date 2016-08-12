@@ -49,24 +49,26 @@ sub subtracter {
   my ($self, $i, $o) = @_;
   my ($out) = values %$o;
 
-  return if $i->{input0}->is_empty;
-  return if $i->{input1}->is_empty;
+  return if $i->{arg1}->is_empty;
+  return if $i->{arg2}->is_empty;
   return if $out->is_full;
 
-  my $s0 = $i->{input0}->get_token;
-  my $s1 = $i->{input1}->get_token;
+  my $s0 = $i->{arg1}->get_token;
+  my $s1 = $i->{arg2}->get_token;
   my $d = $s0 - $s1;
 
   $self->announce("result=$d");
   $out->put_token($d);
 }
 
+# redo this to take arbitrary number of inputs
+# like the adder
 sub multiplier {
   my ($self, $i, $o) = @_;
   my ($out) = values %$o;
 
-  return if $i->{input0}->is_empty;
-  return if $i->{input1}->is_empty;
+  return if $i->{factor0}->is_empty;
+  return if $i->{factor1}->is_empty;
   return if $out->is_full;
 
   my $prod = $i->{input0}->get_token * $i->{input1}->get_token;
@@ -79,17 +81,40 @@ sub divider {
   my ($self, $i, $o) = @_;
   my ($out) = values %$o;
 
-  return if $i->{input0}->is_empty;
-  return if $i->{input1}->is_empty;
+  return if $i->{dividend}->is_empty;
+  return if $i->{divisor}->is_empty;
   return if $out->is_full;
 
-  my $s0 = $i->{input0}->get_token;
-  my $s1 = $i->{input1}->get_token;
+  my $s0 = $i->{dividend}->get_token;
+  my $s1 = $i->{divisor}->get_token;
   die "Division by zero\n" if $s1 == 0;
   my $q = $s0 / $s1;
 
   $self->announce("result=$q");
   $out->put_token($q);
+}
+
+# Need a way to name these queues
+#   input:  dividend, divisor
+#   output: quotient, remainder
+
+sub divquot {
+  my ($self, $i, $o) = @_;
+
+  return if $i->{dividend}->is_empty;
+  return if $i->{divisor}->is_empty;
+  return if $o->{quotient}->is_full;
+  return if $o->{remainder}->is_full;
+
+  my $dividend = $i->{dividend}->get_token;
+  my $divisor  = $i->{divisor}->get_token;
+  die "Division by zero\n" if $divisor == 0;
+  my $q = int($s0 / $s1);
+  my $r = $dividend - $q * $divisor;
+
+  $self->announce("result= quotient $q remainder $r");
+  $out->{quotient}->put_token($q);
+  $out->{remainder}->put_token($r);
 }
 
 ################################################################
@@ -120,6 +145,19 @@ sub make_output {
     my $tok = $in->get_token();
     print "*** $label: $tok\n";
   };
+}
+
+################################################################
+#
+# Control
+#
+
+sub select {
+  die "unimplemented";
+  my ($self, $i, $o) = @_;
+  my ($out) = values %$o;
+
+  return if $out->is_full;
 }
 
 1;
