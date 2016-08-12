@@ -1,0 +1,51 @@
+
+o There needs to be a way to specify the input and output line names
+  instead of having to write garbage like:
+
+        - con5 - frac[input0]
+
+  when it should at the very least be
+
+        - con5 - frac[dividend]
+
+  Question: does this *define* the name of the connection?  I don't
+  think so because each handler assigns certain semantics to
+  particular names.  For example the divider has inputs named dividend
+  and divisor and they are not the same!  So to use the component you
+  have to now the port names and their meanings.
+
+  In some cases you may not care which port you use, as for example
+  with
+
+        - in - add - out
+
+  where we don't care which input port is used (addend0 or addend1 I
+  guess) and there is only one output port.
+
+o Need an abbreviation for
+
+        - con5 - frac[input0]
+        - frac[output0] - mul
+
+  Presumably:
+
+        - con5 - frac[input0,output0] - mul
+
+  will do.  When the component has only one input or one output we can
+  omit the unambiguous one:
+
+        - con5 - frac[input0] - mul
+
+  This could be ambiguous is there is both an input port named input0
+  and a unique output port also named input0.  I thought this wasn't a
+  big deal until I started to combine this with the previous section
+  where you are _also_ allowed to omit the port name if you don't care
+  which one.  But there is still only a problem if the `input0` can be
+  understood as both an input and an output port, which I am willing
+  to disregard.
+
+  But to do all this there needs to be some way for the parser to
+  query the component about what its port names are.
+
+o More generally, components need a better API.
+
