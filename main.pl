@@ -18,6 +18,7 @@ my $system = System->new({ scheduler_factory => $opt{s} })->load_file($input);
 for my $component (split /,\s*/, $opt{d}) {
   if    ($component eq "system")    { $system                       ->debug(1) }
   elsif ($component eq "scheduler") { $system->scheduler            ->debug(1) }
+  elsif ($component eq "ALL")       { $_->debug(1) for $system->all_components }
   else                              { $system->component($component)->debug(1) }
 }
 

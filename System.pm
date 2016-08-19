@@ -33,6 +33,11 @@ has components => (
   default => sub { {} },
 );
 
+sub all_components {
+  my ($self) = @_;
+  values %{$self->components};
+}
+
 sub add_component {
   my ($self, $name, $component) = @_;
   if ($self->component($name)) {
