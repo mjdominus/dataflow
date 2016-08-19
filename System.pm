@@ -46,6 +46,17 @@ sub component {
   $self->components->{$name};
 }
 
+has component_instance_counter => (
+  is => 'ro',
+  isa => sub { reftype $_[0] eq "HASH" },
+  default => sub { {} },
+);
+
+sub generate_component_name {
+  my ($self, $component_type) = @_;
+  return join "" => $component_type, ++$self->component_instance_counter->{$component_type};
+}
+
 has compiler_factory => (
   is => 'ro',
   default => sub { "Compiler" },
