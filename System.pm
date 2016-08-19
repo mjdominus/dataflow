@@ -2,15 +2,29 @@ package System;
 use Moo;
 use Scalar::Util qw(reftype);
 use namespace::clean;
-use Handler ();
+use Library;
 use Compiler;
 use Component;
 use TokenQueue;
 use Scheduler::Queue;  # default scheduler
+use Util qw(is_a);
 
 has debug => (
   is => 'rw',
   default => 0,
+);
+
+has library_factory => (
+  is => 'ro',
+  default => sub { "Library" },
+);
+
+has library => (
+  is => 'ro',
+  isa => sub { reftype $_[0] eq "HASH" },
+  default => sub { $_[0]->library_factory->new({ system => $_[0]}) },
+  handles => [ qw/add_component_specification component_specification/ ],
+  lazy => 1,
 );
 
 has components => (

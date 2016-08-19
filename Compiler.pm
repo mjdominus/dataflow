@@ -6,6 +6,7 @@ use namespace::clean;
 has system => (
   is => 'ro',
   isa => sub { is_a($_[0], "System") },
+  handles => [ 'library' ],
 );
 
 sub load_file {
@@ -72,15 +73,8 @@ sub handle_connection {
 sub handle_component {
   my ($system, $line) = @_;
   my ($name, $funargs) = $line =~ /(\w+):\s*(.*)/;
-  my ($func, @args) = split /\s+/, $funargs;
-  my $h_func = "Handler::$func";
-  no strict 'refs';
-  not defined(&$h_func) and do {
-    warn "Unknown handler function '$func' in definition of component '$name'\n";
-    return;
-  };
-  my $handler = @args ? $h_func->(@args) : \&$h_func;
-  my $component = Component->new({ name => $name, handler => $handler, system => $system });
+  my ($spec_name, @args) = split /\s+/, $funargs;
+  my $component = $system->library->make_component($spec_name, @args);
   $system->add_component($name => $component);
   return 1;
 }

@@ -1,3 +1,18 @@
+################################################################
+#
+# Decisions
+
+* Port names are scoped to the component instance
+
+
+
+################################################################
+#
+# Think about
+
+o Separate the runtime environment (the system, including the
+  component instances and all the token queues) from the build-time
+  environment (including the component specification library).
 
 o There needs to be a way to specify the input and output line names
   instead of having to write garbage like:
