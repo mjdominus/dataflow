@@ -1,11 +1,11 @@
 package Handler;
-use base Exporter;
 
-our %EXPORT_TAGS = (all => [qw(adder
-                               make_constant
-                               make_input make_output)],
-                   );
-Exporter::export_tags('all');
+sub handler_list {
+  qw[ make_constant
+      adder subtracter multiplier divider
+      make_input make_output
+   ];
+}
 
 sub make_constant {
   my ($c) = @_;

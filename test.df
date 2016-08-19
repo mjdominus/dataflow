@@ -1,8 +1,8 @@
 
-* in:    make_input input
-* three: make_constant 3
+* in:    input input
+* three: constant 3
 * add:   adder
-* out:   make_output output    
+* out:   output output
 
 - in - add - out
 - three[output0] - add

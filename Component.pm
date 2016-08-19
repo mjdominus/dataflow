@@ -1,4 +1,7 @@
 package Component;
+# Single INSTANCE of a component
+# Most of its behavior is in ComponentType
+
 use Moo;
 use namespace::clean;
 use Scalar::Util qw(reftype);
@@ -11,27 +14,60 @@ has debug => (
   default => 0,
 );
 
-has name => (
+has prototype => (
   is => 'ro',
-  isa => sub { not defined ref $_[0] },
+  required => 1,
+  isa => sub { is_a($_[0], 'ComponentType') },
 );
 
-has name_counter => (
+has handler => (
+  is => 'ro',
+  lazy => 1,
+  isa => sub { reftype $_[0] eq "CODE" },
+  builder => 'build_handler',
+);
+
+has handler_generator_arguments => (
+  is => 'ro',
+  isa => sub { reftype $_[0] eq "ARRAY" },
+  required => 1,
+);
+
+sub build_handler {
+  my ($self) = @_;
+  $self->prototype->make_handler_function(@{$self->handler_generator_arguments});
+}
+
+has instance_name => (
+  is => 'ro',
+  isa => sub { not defined ref $_[0] },
+  default => sub { $_[0]->system->generate_component_name($_[0]->prototype->name) },
+  lazy => 1,
+);
+
+# "Adder 'add3'"
+sub name {
+  my ($self) = @_;
+  sprintf "%s '%s'", $self->prototype->name, $self->instance_name;
+}
+
+has port_name_counter => (
   is => 'ro',
   isa => sub { reftype $_[0] eq "HASH" },
   default => sub { {} },
 );
 
-sub gen_name {
+sub gen_port_name {
   my ($self, $prefix) = @_;
   $prefix //= "port";
-  my $n = $self->name_counter->{$prefix}++;
+  my $n = $self->port_name_counter->{$prefix}++;
   return "$prefix$n";
 }
 
 has system => (
   is => 'ro',
   isa => sub { is_a($_[0], "System") },
+  required => 1,
 );
 
 # Hash mapping input names to TokenQueues
@@ -43,7 +79,7 @@ has input => (
 
 sub attach_input {
   my ($self, $name, $token_queue) = @_;
-  $name //= $self->gen_name("input");
+  $name //= $self->gen_port_name("input");
   $self->input->{$name} = $token_queue;
 }
 
@@ -56,17 +92,9 @@ has output => (
 
 sub attach_output {
   my ($self, $name, $token_queue) = @_;
-  $name //= $self->gen_name("output");
+  $name //= $self->gen_port_name("output");
   $self->output->{$name} = $token_queue;
 }
-
-
-# Run when one of the input or output queues changes state
-has handler => (
-  is => 'ro',
-  isa => sub { reftype $_[0] eq 'CODE' },
-  required => 1,
-);
 
 sub notify {
   $_[0]->system->schedule($_[0]);
