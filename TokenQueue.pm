@@ -50,7 +50,7 @@ sub get_token {
   my ($self) = @_;
   $self->croak("is empty") if $self->is_empty;
   my $was_full = $self->is_full;
-  my $token = pop @{$self->queue};
+  my $token = shift @{$self->queue};
   $self->source->notify if $was_full;
   return $token;
 }
