@@ -1,10 +1,10 @@
 package Library;
-# Registry of ComponentSpecifications
+# Registry of ComponentTypes
 use Moo;
 use namespace::clean;
 use Scalar::Util qw(reftype);
 use Handler;
-use ComponentSpecification;
+use ComponentType;
 use Util;
 
 has system => (
@@ -35,7 +35,7 @@ has handler_class => (
 
 has component_specification_factory => (
   is => 'ro',
-  default => sub { "ComponentSpecification" },
+  default => sub { "ComponentType" },
 );
 
 has component_factory => (

@@ -1,6 +1,6 @@
 package Component;
 # Single INSTANCE of a component
-# Most of its behavior is in ComponentSpecification
+# Most of its behavior is in ComponentType
 
 use Moo;
 use namespace::clean;
@@ -17,7 +17,7 @@ has debug => (
 has prototype => (
   is => 'ro',
   required => 1,
-  isa => sub { is_a($_[0], 'ComponentSpecification') },
+  isa => sub { is_a($_[0], 'ComponentType') },
 );
 
 has handler => (

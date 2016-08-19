@@ -1,4 +1,4 @@
-package ComponentSpecification;
+package ComponentType;
 use Moo;
 use namespace::clean;
 use Scalar::Util qw(reftype);
