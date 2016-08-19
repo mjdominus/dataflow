@@ -4,6 +4,7 @@ sub handler_list {
   qw[ make_constant
       adder subtracter multiplier divider
       make_input make_output
+      merge split
    ];
 }
 
@@ -123,6 +124,49 @@ sub make_output {
     my $tok = $in->get_token();
     print "*** $label: $tok\n";
   };
+}
+
+################################################################
+#
+# Token flow
+#
+
+sub merge {
+  my ($self, $i, $o) = @_;
+  my ($o_name) = keys %$o;
+  my $out = $o->{$o_name};
+  return if $out->is_full;
+  for my $i_name (keys %$i) {
+    my $in = $i->{$i_name};
+    unless ($in->is_empty) {
+      my $token = $in->get_token();
+      $self->announce("merging token ($token) from input '$i_name' to output '$o_name'");
+      $out->put_token($token);
+      $self->notify;
+      return;
+    }
+  }
+  $self->announce("nothing to merge");
+}
+
+sub split {
+  my ($self, $i, $o) = @_;
+  my ($i_name) = keys %$i;
+  my $in = $i->{$i_name};
+
+  return if $in->is_empty;
+  for my $out (values %$o) {
+    return if $out->is_full;
+  }
+
+  my $token = $in->get_token;
+  for my $o_name (keys %$o) {
+    my $out = $o->{$o_name};
+    unless ($out->is_full) {
+      $self->announce("splitting token from input '$i_name' to output '$o_name'");
+      $out->put_token($token);
+    }
+  }
 }
 
 1;

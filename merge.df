@@ -1,0 +1,12 @@
+
+* in1: input input1
+* in2: input input2
+* merge: merge
+* out: output output
+
+- in1 - merge - out
+- in2 - merge
+
+! in1 in2
+
+

@@ -1,0 +1,17 @@
+
+* in:    input input
+* out1:   output output1
+* out2:   output output2
+* out3:   output output3
+* split1:   split
+* split2:   split
+
+- in - split1 - split2 - out1 
+- split1 - out2
+- split2 - out3
+
+! in 
+
+
+
+
