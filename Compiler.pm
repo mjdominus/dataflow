@@ -74,7 +74,7 @@ sub handle_component {
   my ($system, $line) = @_;
   my ($name, $funargs) = $line =~ /(\w+):\s*(.*)/;
   my ($spec_name, @args) = split /\s+/, $funargs;
-  my $component = $system->library->make_component($spec_name, @args);
+  my $component = $system->library->make_component($spec_name, $name, @args);
   $system->add_component($name => $component);
   return 1;
 }

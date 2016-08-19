@@ -67,13 +67,13 @@ sub build_catalog {
 
 my $instance_name_counter = 0;
 sub make_component {
-  my ($self, $name, @handler_generator_arguments) = @_;
-  my $cs = $self->catalog->{$name} or return;
+  my ($self, $spec_name, $name, @handler_generator_arguments) = @_;
+  my $cs = $self->catalog->{$spec_name} or return;
   my $component = $self->component_factory
     ->new({ prototype => $cs,
-            instance_name => "autoname" . ++$instance_name_counter,
             system => $self->system,
             handler_generator_arguments => \@handler_generator_arguments,
+            instance_name => $name,
            });
   return $component;
 }
