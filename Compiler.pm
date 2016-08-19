@@ -75,6 +75,10 @@ sub handle_component {
   my ($name, $funargs) = $line =~ /(\w+):\s*(.*)/;
   my ($spec_name, @args) = split /\s+/, $funargs;
   my $component = $system->library->make_component($spec_name, $name, @args);
+  not defined $component and do {
+    warn "Unknown component type '$spec_name' in component line '$line'\n";
+    return;
+  };
   $system->add_component($name => $component);
   return 1;
 }
