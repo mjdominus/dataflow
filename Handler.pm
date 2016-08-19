@@ -106,7 +106,7 @@ sub make_input {
     print "$prompt> ";
     chomp(my $input = <STDIN>);
     return if $input eq "none" || $input eq "";
-    $out->put_token($input);
+    $out->put_token($input) unless $input eq "pass";   # reschedule but don't generate a token
     $self->notify unless $out->is_full;
   }
 }
