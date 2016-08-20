@@ -73,3 +73,27 @@ o Need an abbreviation for
 
 o More generally, components need a better API.
 
+  o The gui is going to need it.
+
+o With select and distribute there seem to be two ways they could
+  work.  Consider select, which has three inputs, called control,
+  in_t, and in_f.  The select component examines the token on its
+  control input, and then selects and outputs the token on in_t if the
+  control token is true, and on in_f if the control token is false.
+  When does it unblock?
+
+    1.  Only when all three inputs are available.
+
+    2.  It peeks at the control token without reading it.  Then if the
+        correct one of in_f or in_t is available, it dequeues the
+        control token and the appropriate input token, leaving the
+        other input token unread.
+
+  On can ask the dual question about distribute and its output
+  queues.  Does it unblock only when both outputs are ready?
+
+  (2) requires a new "peeking" option, which would be a significant
+  departure.  But there may be certain kinds of tasks for which it is
+  required.  For example, suppose in_t is saturated and control is
+  also saturated with true tokens.  But if in_f is empty, the tokens
+  and the component train producing them are all blocked.
