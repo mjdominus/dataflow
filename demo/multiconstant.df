@@ -1,0 +1,9 @@
+
+* three: constant 3 4
+* out:   output output
+
+- three - out
+
+! three
+
+

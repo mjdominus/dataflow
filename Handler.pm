@@ -8,15 +8,20 @@ sub handler_list {
    ];
 }
 
+# Emit at most $n tokens with value $c
+# If $n not supplied, emit an unlimited number of tokens
 sub make_constant {
-  my ($c) = @_;
+  my ($c, $n) = @_;
+  my $infinity = not defined $n;
   sub {
     my ($self, undef, $o) = @_;
+    return unless $infinity || $n > 0;
     for my $out (values %$o) {
       unless ($out->is_full) {
         $self->announce("emitting constant $c");
         $out->put_token($c);
         $self->notify unless $out->is_full;
+        return unless $infinity || --$n > 0;
       }
     };
   }
