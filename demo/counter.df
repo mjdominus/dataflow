@@ -1,0 +1,20 @@
+
+* adder: adder
+* input: input input
+* output: output output
+* inc: constant 1
+
+* merge1: merge
+* merge2: merge
+* split1: split
+* split2: split
+
+- inc - adder
+- input - split1 - merge1 - adder
+-         split1 - merge2 - output
+- adder - split2 - merge2
+-         split2 - merge1
+
+! input inc
+
+

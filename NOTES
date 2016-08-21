@@ -161,3 +161,33 @@ o With select and distribute there seem to be two ways they could
 o Eventually you need a compiler that translates ordinary expressions
   and conventional control flow constructs into dataflow networks.
 
+################################################################
+#
+# Systems
+
+* I tried imeplenting an iota function: input one token, sa y3, and
+  then it counts up from 3 to infinity.  
+
+    * First I tried diagramming it in Inkscape.  What a pain in the
+      ass.  Also, it convinced me that the thing would be nearly
+      impossible to do.
+
+    * But then I went ahead and did it anyway and it was really easy
+      to write the .df file.  I got it right on the first try.
+
+      Is this the way this is really going to go?
+
+      Maybe I would have had more trouble if I hadn't tried to draw
+      the diagram first.
+
+    * But as you realized in 1991, you are going to need an
+      abstraction mechanism.  You don't want to have to define 8
+      components and 9 wires every time you want an iota.  You want
+
+      : define iota { ... }
+      * counter: iota 3
+
+    o Also maybe components like split and merge should issue warnings
+      if you don't connect enough inputs or outputs.
+
+        
