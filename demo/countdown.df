@@ -1,0 +1,28 @@
+
+* input: input start-number?
+* out: output output
+
+* con0: constant 0
+* con1: constant 1
+
+* dec: subtracter
+* lt: comparator <
+
+* test: distribute
+* trash: sink
+
+* s1: split
+* s2: split
+* m1: merge
+
+-  con0  - lt[input0]
+-  input - m1 - s1 - lt[input1]
+-                    lt[output0] - test[control]
+-               s1 - test[input]
+-  test[output_f] - trash
+-  test[output_t] - s2 - out
+-                   s2 - dec
+-                 con1 - dec - m1
+
+! con0 con1 input 
+

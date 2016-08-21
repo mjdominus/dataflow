@@ -4,7 +4,9 @@ sub handler_list {
   qw[ make_constant
       adder subtracter multiplier divider
       make_input make_output
-      merge split
+      merge split sink
+      make_comparator
+      select distribute
    ];
 }
 
@@ -100,6 +102,34 @@ sub divider {
 
 ################################################################
 #
+# Comparisons
+#
+
+sub make_comparator {
+  my ($op) = @_;
+  my $opf = { ">"  => sub { $_[0] >  $_[1] },
+              "="  => sub { $_[0] == $_[1] },
+              "<"  => sub { $_[0] <  $_[1] },
+              ">=" => sub { $_[0] >= $_[1] },
+              "<=" => sub { $_[0] <= $_[1] },
+              "!=" => sub { $_[0] != $_[1] },
+            };
+  my $cmp = $opf->{$op} or die "Unknown comparator op '$op'\n";
+  sub {
+    my ($self, $i, $o) = @_;
+    return if $i->{input0}->is_empty();
+    return if $i->{input1}->is_empty();
+    return if $o->{output0}->is_full();
+    my ($a, $b) = map $i->{$_}->get_token, qw(input0 input1);
+    my $res = 0 + $cmp->($a, $b);
+    $self->announce(sprintf "comparator %s %s %s yields %s",
+                    $a, $op, $b, $res ? "TRUE" : "FALSE");
+    $o->{output0}->put_token($res);
+  };
+}
+
+################################################################
+#
 # I/O
 #
 
@@ -173,6 +203,14 @@ sub split {
     }
   }
 }
+
+sub sink {
+  my ($self, $i, $o) = @_;
+  for my $in (values %$i) {
+    $in->get_token() until $in->is_empty();
+  }
+}
+
 
 ################################################################
 #
