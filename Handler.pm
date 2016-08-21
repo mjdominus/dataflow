@@ -174,4 +174,40 @@ sub split {
   }
 }
 
+################################################################
+#
+# Control flow
+#
+
+sub select {
+  my ($self, $i, $o) = @_;
+  my ($out) = values %$o;
+  return if $out->is_full;
+  for my $in (values %$i) {
+    return if $in->is_empty;
+  }
+
+  my $control = $i->{control}->get_token();
+  my $t_tok = $i->{in_t}->get_token();
+  my $f_tok = $i->{in_f}->get_token();
+  $out->put_token($control ? $t_tok : $f_tok);
+}
+
+sub distribute {
+  my ($self, $i, $o) = @_;
+
+  for my $in (values %$i) {
+    return if $in->is_empty;
+  }
+  for my $out (values %$o) {
+    return if $out->is_full;
+  }
+
+  my $control = $i->{control}->get_token();
+  my $tok = $i->{input}->get_token();
+
+  $o->{$control ? 'output_t' : 'output_f'}->put_token($tok);
+}
+
+
 1;

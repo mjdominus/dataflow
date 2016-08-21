@@ -97,3 +97,5 @@ o With select and distribute there seem to be two ways they could
   required.  For example, suppose in_t is saturated and control is
   also saturated with true tokens.  But if in_f is empty, the tokens
   and the component train producing them are all blocked.
+
+  * For now, we're going with choice (1).
