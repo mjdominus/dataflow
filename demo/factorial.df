@@ -1,0 +1,55 @@
+
+* input: input n
+* out: output factorial
+* con1a: constant 1
+* con1b: constant 1
+
+* equals: comparator =
+* mul: multiplier
+* test: distribute
+* dec: subtracter
+
+* m1: merge
+* s1: split
+* s2: split
+
+################################################################
+#
+# Countdown
+
+* con0cd: constant 0
+* con1cd: constant 1
+
+* deccd: subtracter
+* lt: comparator <
+
+* testcd: distribute
+* trash: sink
+
+* s1cd: split
+* s2cd: split
+* m1cd: merge
+
+-  con0cd              - lt[input0]
+-  dec - m1cd - s1cd - lt[input1]
+-                      lt[output0] - testcd[control]
+-                 s1cd - testcd[input]
+-  testcd[output_f] - trash
+-  testcd[output_t] - s2cd - s2
+-                     s2cd - deccd
+-                   con1cd - deccd - m1cd
+################################################################
+
+-  input - s1 - m1 - mul
+-          s1 - dec[input0]
+-       con1a - dec[input1]
+-          s2 - mul - test[input]
+-          s2 - equals   - test[control]
+-       con1b - equals
+- test[output_f] - m1
+- test[output_t] - out
+
+! con0cd con1cd
+! input con1a con1b
+
+
