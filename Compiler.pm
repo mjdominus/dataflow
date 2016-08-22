@@ -31,6 +31,7 @@ my %line_handler = ('-' => \&handle_connection,
 
 sub load_line {
   my ($self, $line) = @_;
+  $line =~ s/#.*//;             # discard comments
 
   return 1 unless $line =~ /\S/;
   unless ($line =~ /^\s*(\S)\s/) {
