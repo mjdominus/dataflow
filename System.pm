@@ -4,7 +4,7 @@ use Scalar::Util qw(reftype);
 use namespace::clean;
 use Library;
 use Compiler;
-use Component;
+use Network;
 use TokenQueue;
 use Scheduler::Queue;  # default scheduler
 use Util qw(is_a);

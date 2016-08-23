@@ -1,5 +1,5 @@
 
-Componentshave the following properties:
+Components have the following properties:
 
 1.Boolean: whether they are initially scheduled
 2.Handler: run when activated, processes tokens

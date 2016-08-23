@@ -57,12 +57,12 @@ sub get_token {
 
 has source => (
   is => 'ro',
-  isa => sub { is_a($_[0], "Component") },
+  isa => sub { is_a($_[0], "Network") },
 );
 
 has target => (
   is => 'ro',
-  isa => sub { is_a($_[0], "Component") },
+  isa => sub { is_a($_[0], "Network") },
 );
 
 1;
