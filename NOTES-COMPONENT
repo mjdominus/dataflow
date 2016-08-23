@@ -1,0 +1,43 @@
+
+Componentshave the following properties:
+
+1.Boolean: whether they are initially scheduled
+2.Handler: run when activated, processes tokens
+3.Input port list with names
+(How to handle variable port lists like in the adder?)
+4.Output port list with names
+5.Activator predicate: hashes of ready ports, returns boolean
+stating whether to run the handler.
+6.Something about argument names?  Do this later.
+
+Saysome network has
+
+name: component
+
+where'component' is not a primitive component.
+
+1.Take the component definition, loading if necessary
+2.Instantiate it  (something about arguments)
+This ought to recursively instantiate its subcomponents and
+their wires.
+3.Qualify the names of all its subcomponents and wires
+4.Load them into the system
+
+Ithink you need to think harder about component templates
+vs.component instances, and how components are instantiated.
+
+----------------------------------------------------------------
+
+1.Compiling a definition file should produce one
+ComponentSpecification. This may recursively call the compiler to
+compile required subcomponents.
+
+2.The root ComponentSpecification is instantiated.  This recursively
+instantiates the subcomponents which includes connecting up the
+wire.
+
+3.We're renaming ComponentSpecification to Component
+ComponentInstance      to Network
+The System as a root_network attribute that it runs.
+
+

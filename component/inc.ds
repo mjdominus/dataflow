@@ -1,0 +1,42 @@
+
+#This looks pretty much just like a network definition, which is a
+#great sign
+
+=inputs:  foo
+=outputs: bar
+
+*add: adder
+*con1: constant 1
+
+-foo - add - bar
+-con1 - add
+
+!con1
+
+
+#Then in a caller
+#
+#* some_name: inc
+#
+#-                   inc[bar] - something
+#-  something_else - inc[foo]
+
+
+#And this has the effect of:
+
+#* some_name.add: adder
+#* some_name.con1: constant 1
+#* some_name.foo: dummy
+#* some_name.bar: dummy
+#-   some_name.foo - some_name.add - some_name.bar
+#-   some_name.con1 - some_name.add
+#
+#-                  some_name.bar - something
+#- something_else - some_name.foo
+#
+
+#A refinement: a later pass optimizes away the dummies:
+#
+#s - dummy - dummy - t
+#
+#can be optimized to s - t.
