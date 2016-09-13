@@ -27,61 +27,44 @@ has library => (
   lazy => 1,
 );
 
-has components => (
+has component_factory => (
   is => 'ro',
-  isa => sub { reftype $_[0] eq "HASH" },
-  default => sub { {} },
+  default => sub { "Component" },
+  handles => { new_component => 'new' },
 );
 
-sub all_components {
-  my ($self) = @_;
-  values %{$self->components};
-}
-
-sub add_component {
-  my ($self, $name, $component) = @_;
-  if ($self->component($name)) {
-    die "Duplicate component '$name'\n";
-  }
-  $self->components->{$name} = $component;
-}
-
-sub component {
-  my ($self, $name) = @_;
-  $self->components->{$name};
-}
-
-has component_instance_counter => (
-  is => 'ro',
-  isa => sub { reftype $_[0] eq "HASH" },
-  default => sub { {} },
+has network => (
+  is => 'rwp',
+  isa => sub { is_a($_[0], 'Network') },
 );
-
-sub generate_component_name {
-  my ($self, $component_type) = @_;
-  return join "" => $component_type, ++$self->component_instance_counter->{$component_type};
-}
 
 has compiler_factory => (
   is => 'ro',
   default => sub { "Compiler" },
+  handles => { new_compiler => 'new' },
 );
 
 has compiler => (
   is => 'ro',
   lazy => 1,
-  default => sub { $_[0]->compiler_factory->new({ system => $_[0] }) },
+  default => sub { $_[0]->new_compiler({ system => $_[0], library => $_[0]->library }) },
 );
 
 sub load_file {
   my ($self, @args) = @_;
-  $self->compiler->load_file(@args);
-  return $self;
-}
+  my $component = $self->new_component({ primitive => 0,
+                                         name => 'ROOT',
+                                         handler_generator => sub {},
+                                       });
+  $self->compiler->load_file($component, @args);
 
-sub load_spec {
-  my ($self, @args) = @_;
-  $self->compiler->load_spec(@args);
+  my $network = $component->instantiate({
+    instance_name => 'MAIN',
+    system        => $self,
+  });
+
+  $self->_set_network($network);
+
   return $self;
 }
 
@@ -118,6 +101,11 @@ sub build_scheduler {
     unless defined $scheduler;
 
   return $scheduler;
+}
+
+sub schedule_prescheduled_components {
+  my ($self) = @_;
+  $self->network->schedule_prescheduled_components();
 }
 
 sub run {

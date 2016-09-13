@@ -1,0 +1,11 @@
+
+= input main_in
+= output main_out
+
+* i: inc
+* d: dec
+
+-   main_in - i[i_in]
+-   i[i_out] - d[d_in]
+-   d[d_out] - main_out
+

@@ -57,6 +57,7 @@ sub build_catalog {
     no strict 'refs';
     $catalog{$name} =
       $self->component_specification_factory->new({
+        is_primitive                      => 1,
         name                              => $name,
         handler_generator                 => $handler,
         handler_generator_wants_arguments => $wants_args,
@@ -66,16 +67,11 @@ sub build_catalog {
 }
 
 my $instance_name_counter = 0;
-sub make_component {
-  my ($self, $spec_name, $name, @handler_generator_arguments) = @_;
-  my $cs = $self->catalog->{$spec_name} or return;
-  my $component = $self->component_factory
-    ->new({ prototype => $cs,
-            system => $self->system,
-            handler_generator_arguments => \@handler_generator_arguments,
-            instance_name => $name,
-           });
-  return $component;
+sub find_component {
+  my ($self, $name) = @_;
+  return $self->catalog->{$name};
 }
 
 1;
+__DATA__
+

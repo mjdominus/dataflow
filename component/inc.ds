@@ -2,16 +2,17 @@
 #This looks pretty much just like a network definition, which is a
 #great sign
 
-=inputs:  foo
-=outputs: bar
+= inputs  i_in
+= outputs i_out
 
-*add: adder
-*con1: constant 1
+* add: adder
+* con1: constant 1
 
--foo - add - bar
--con1 - add
+- i_in - add[input1]
+- add[output] - i_out
+- con1[output] - add[input2]
 
-!con1
+! con1
 
 
 #Then in a caller

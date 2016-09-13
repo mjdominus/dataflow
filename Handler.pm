@@ -19,6 +19,7 @@ sub make_constant {
     my ($self, undef, $o) = @_;
     return unless $infinity || $n > 0;
     for my $out (values %$o) {
+      $self->announce(sprintf "%s: examining output %s", $self->name, $out->name);
       unless ($out->is_full) {
         $self->announce("emitting constant $c");
         $out->put_token($c);
@@ -42,11 +43,14 @@ sub adder {
   # from the hander computation?
   return if $out->is_full;
   for my $in (values %$i) {
+    $self->announce(sprintf "%s: examining input %s for emptiness",
+                    $self->name, $in->name);
     return if $in->is_empty;
   }
 
   my $s = 0;
   for my $in (values %$i) {
+    $self->announce(sprintf "%s: fetching input %s", $self->name, $in->name);
     $s += $in->get_token;
   }
   $self->announce("result=$s");

@@ -1,0 +1,11 @@
+=inputs:  d_in
+=outputs: d_out
+
+*sub: subtracter
+*con1: constant 1
+
+-d_in - sub[input0]
+-       sub - d_out
+-con1 - sub[input1]
+
+!con1

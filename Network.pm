@@ -6,43 +6,30 @@ use Moo;
 use namespace::clean;
 use Scalar::Util qw(reftype);
 use Util;
-
-use System;
+use Carp qw(croak confess);
 
 has debug => (
   is => 'rw',
   default => 0,
 );
 
+has system => (
+  is => 'ro',
+  isa => sub { is_a($_[0], "System") },
+  required => 1,
+);
+
 has prototype => (
   is => 'ro',
   required => 1,
   isa => sub { is_a($_[0], 'Component') },
+  handles => [ qw/ is_primitive is_prescheduled / ],
 );
-
-has handler => (
-  is => 'ro',
-  lazy => 1,
-  isa => sub { reftype $_[0] eq "CODE" },
-  builder => 'build_handler',
-);
-
-has handler_generator_arguments => (
-  is => 'ro',
-  isa => sub { reftype $_[0] eq "ARRAY" },
-  required => 1,
-);
-
-sub build_handler {
-  my ($self) = @_;
-  $self->prototype->make_handler_function(@{$self->handler_generator_arguments});
-}
 
 has instance_name => (
   is => 'ro',
-  isa => sub { not defined ref $_[0] },
-  default => sub { $_[0]->system->generate_component_name($_[0]->prototype->name) },
-  lazy => 1,
+  required => 1,
+  isa => sub { defined $_[0] && ! defined ref $_[0] },
 );
 
 # "Adder 'add3'"
@@ -64,45 +51,70 @@ sub gen_port_name {
   return "$prefix$n";
 }
 
-has system => (
-  is => 'ro',
-  isa => sub { is_a($_[0], "System") },
-  required => 1,
-);
-
-# Hash mapping input names to TokenQueues
-has input => (
+has subnetworks => (
   is => 'ro',
   isa => sub { reftype $_[0] eq 'HASH' },
   default => sub { {} },
 );
 
-sub attach_input {
-  my ($self, $name, $token_queue) = @_;
-  $name //= $self->gen_port_name("input");
-  $self->input->{$name} = $token_queue;
+sub has_subnetwork {
+  my ($self, $name) = @_;
+  exists $self->subnetworks->{$name};
 }
 
-# Hash mapping output names to TokenQueues
-has output => (
+sub add_subnetwork {
+  my ($self, $name, $net) = @_;
+  if ($self->has_subnetwork($name)) {
+    die sprintf "%s: duplicate subnetwork named '%s'\n",
+      $self->name, $name;
+  }
+
+  $self->subnetworks->{$name} = $net;
+}
+
+sub subnetwork {
+  my ($self, $name) = @_;
+  return $self->subnetworks->{$name};
+}
+
+has input_interfaces => (
   is => 'ro',
   isa => sub { reftype $_[0] eq 'HASH' },
   default => sub { {} },
 );
 
-sub attach_output {
-  my ($self, $name, $token_queue) = @_;
-  $name //= $self->gen_port_name("output");
-  $self->output->{$name} = $token_queue;
+sub add_input_interface {
+  my ($self, $name, $iif) = @_;
+  is_a($iif, "Interface")
+    or die sprintf "Non-interface %s supplied as interface %s!\n",
+      $iif, $name;
+  # check for uniqueness of name here?
+  $self->input_interfaces->{$name} = $iif;
 }
 
-sub notify {
-  $_[0]->system->schedule($_[0]);
+sub input_interface {
+  my ($self, $name) = @_;
+  $self->input_interfaces->{$name};
 }
 
-sub activate {
-  my ($self) = @_;
-  $self->handler->($self, $self->input, $self->output);
+has output_interfaces => (
+  is => 'ro',
+  isa => sub { reftype $_[0] eq 'HASH' },
+  default => sub { {} },
+);
+
+sub add_output_interface {
+  my ($self, $name, $iif) = @_;
+  is_a($iif, "Interface")
+    or die sprintf "Non-interface %s supplied as interface %s!\n",
+      $iif, $name;
+  # check for uniqueness of name here?
+  $self->output_interfaces->{$name} = $iif;
+}
+
+sub output_interface {
+  my ($self, $name) = @_;
+  $self->output_interfaces->{$name};
 }
 
 sub announce {
@@ -110,5 +122,75 @@ sub announce {
   return unless $self->debug;
   $self->system->announce($self->name, @msg);
 }
+
+sub attach_input {
+  my ($self, $q, $input_name) = @_;
+  defined $input_name or confess("no input name");
+  my $interface = $self->input_interface($input_name)
+    or die sprintf "Can't find input interface '%s' of network '%s'\n",
+      $input_name, $self->name;
+  $interface->target($q);
+  return $interface;
+}
+
+sub attach_output {
+  my ($self, $q, $output_name) = @_;
+  defined $output_name or confess("no output name");
+  my $interface = $self->output_interface($output_name)
+    or die sprintf "Can't find output interface '%s' of network '%s'\n",
+      $output_name, $self->name;
+  $interface->source($q);
+  return $interface;
+}
+
+# What's the node at the source end of this interface chain?
+sub source_node {
+  my ($self, $interface_name) = @_;
+  die "unimplemented\n";
+}
+
+sub target_node {
+  my ($self, $interface_name) = @_;
+  die "unimplemented\n";
+}
+
+sub schedule_prescheduled_components {
+  my ($self) = @_;
+
+  # Schedule all unattached input interfaces
+  for my $input (values %{$self->input_interfaces}) {
+    $input->notify;
+  }
+
+  for my $name (keys %{$self->subnetworks}) {
+    my $subnet = $self->subnetwork($name);
+
+    if ($subnet->is_primitive) {
+      # Simple nodes get prescheduled if they are on the list
+      if ($self->is_prescheduled($name)) {
+        $self->system->schedule($subnet);
+      }
+    } else {
+      # recurse into subnetworks looking for more nodes
+      $subnet->schedule_prescheduled_components;
+    }
+  }
+}
+
+sub search {
+  my ($self, $net_code, $node_code, $prefix) = @_;
+  $prefix //= "";
+  $net_code && $net_code->($self, "/$prefix");
+  for my $subnet_name (keys %{$self->subnetworks}) {
+    my $sub_prefix = join "/" => $prefix, $subnet_name;
+    my $subnet = $self->subnetwork($subnet_name);
+    if ($subnet->is_primitive) {
+      $node_code && $node_code->($subnet, $sub_prefix);
+    } else {
+      $self->subnetwork($subnet_name)->search($net_code, $node_code, $sub_prefix);
+    }
+  }
+}
+
 
 1;
