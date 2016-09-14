@@ -335,51 +335,11 @@ sub instantiate_network {
   }
 
   for my $wire_desc (@{$self->wiring_diagram}) {
-    $self->build_wire($wire_desc, $instance);
+    $instance->build_wire($wire_desc);
   }
 
   return $instance;
 }
 
-# A wire descriptor has { source => ... , target => ... }
-# where the source and target values are one of:
-# { subnetwork => subnet_name
-#   interface => subnet_interface_name }
-# { subnetwork => subnet_name }   # interface name will be inferred
-# { own_interface => own_interface_name, direction => {input/output} }
-sub build_wire {
-  my ($self, $wire, $net) = @_;
-
-  my $source = $wire->{source};
-  my $target = $wire->{target};
-
-  # In the first draft, we'll always build a token queue
-  # and attach it to the two points.
-  # Later we'll optimize away chains of token queues somehow.
-  my $q = TokenQueue->new;
-
-  if ($source->{direction}) {
-    my $attachment_point = $net->attach_input($q, $source->{own_interface});
-    $q->source($attachment_point);
-  } else {
-    my $subnet = $net->subnetworks->{$source->{subnetwork}}
-      or die "$source->{subnetwork}???";
-    my $ifname = $source->{interface} // die "unimplemented";
-    $subnet->attach_output($q, $ifname);
-    $q->source($subnet->source_node($ifname));
-  }
-
-  if ($target->{direction}) {
-    my $attachment_point = $net->attach_output($q, $target->{own_interface});
-    $q->target($attachment_point);
-  } else {
-    my $subnet = $net->subnetworks->{$target->{subnetwork}}
-      or die "$target->{subnetwork}???";
-    my $ifname = $target->{interface} // die "unimplemented";
-    $subnet->attach_input($q, $ifname);
-    $q->target($subnet->target_node($ifname));
-  }
-
-}
 
 1;
