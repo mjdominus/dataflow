@@ -3,7 +3,7 @@
 use Node;
 
 use t::lib::TestUtil;
-use TokenQueue;
+use Mock::TokenQueue;
 use System;
 
 use Test::More;
@@ -19,8 +19,8 @@ my $handler_calls = 0;
 ok($node, "node");
 ok($node->is_primitive, "is primitive");
 
-$node->attach_input(my $in = TokenQueue->new, "an_input");
-$node->attach_output(my $out = TokenQueue->new, "some_output");
+$node->attach_input(my $in = Mock::TokenQueue->new, "an_input");
+$node->attach_output(my $out = Mock::TokenQueue->new, "some_output");
 
 cmp_deeply($node->input, { an_input => ignore() }, "check input hash");
 cmp_deeply($node->output, { some_output => ignore() }, "check output hash");

@@ -1,6 +1,9 @@
 
-package TokenQueue;
+package Mock::TokenQueue;
 use Carp qw(confess croak);
+use Mock::Node;
+
+my $fake_node = Mock::Node->new();
 
 sub new {
   my ($class) = @_;
@@ -24,7 +27,7 @@ sub is_full { @{$_[0]} == 5 }
 
 sub size { 0 + @{$_[0]} }
 
-sub source {}
-sub target {}
+sub source { $fake_node }
+sub target { $fake_node }
 
 1;
