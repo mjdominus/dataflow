@@ -6,5 +6,7 @@ sub new {
   bless {} => $class;
 }
 
+sub notify { $_[0]{notifications}++ }
+
 1;
 

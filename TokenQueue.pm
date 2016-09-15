@@ -41,7 +41,6 @@ sub croak {
 
 sub put_token {
   my ($self, $token) = @_;
-  warn "token queue ", $self->name, " gets token $token\n";
   $self->croak("is full") if $self->is_full;
   my $was_empty = $self->is_empty;
   push @{$self->queue}, $token;
@@ -67,6 +66,7 @@ has target => (
   isa => sub { is_a($_[0], "Node") || is_a($_[0], "Interface") },
 );
 
+# For debugging; get rid of this later
 sub what_ho {
   my ($self) = @_;
   printf STDERR "TokenQueue %s reporting!\n\tSource is %s %s\n\tTarget is %s %s.\n",
