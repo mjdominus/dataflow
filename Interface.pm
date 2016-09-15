@@ -40,12 +40,24 @@ has type => (
   required => 1,
 );
 
+has activate_input_function => (
+  is => 'ro',
+  isa => sub { reftype $_[0] eq "CODE" },
+  default => sub { \&activate_input },
+);
+
+has activate_output_function => (
+  is => 'ro',
+  isa => sub { reftype $_[0] eq "CODE" },
+  default => sub { \&activate_output },
+);
+
 sub activate {
   my ($self) = @_;
   if ($self->type eq "input") {
-    $self->activate_input;
+    $self->activate_input_function->();
   } elsif ($self->type eq "output") {
-    $self->activate_output;
+    $self->activate_output_function->();
   } else {
     die $self->type;
   }
