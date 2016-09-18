@@ -31,6 +31,7 @@ sub add_component_specification {
   if (exists $self->catalog->{$name}) {
     die "Duplicate component specification '$name' in library";
   }
+  warn "Library: adding spec for component $name\n";
   $self->catalog->{$name} = $cs;
 }
 
@@ -75,7 +76,9 @@ sub build_catalog {
 my $instance_name_counter = 0;
 sub find_component {
   my ($self, $name) = @_;
+  warn "Library: Looking for component '$name' in catalog\n";
   my $known = $self->catalog->{$name};
+  warn "Library: Found component '$name' in catalog\n" if $known;
   return $known if defined($known);
   return $self->load_component($name);
 }
@@ -85,6 +88,7 @@ sub load_component {
   for my $dir (@{$self->search_path}) {
     my $file = "$dir/$name.ds";
     if (-e $file) {
+      warn "Found component definition $name in $file\n";
       $self->system->load_file($name, $file);
       return $self->catalog->{$name};
     }

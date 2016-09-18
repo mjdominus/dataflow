@@ -41,6 +41,7 @@ sub croak {
 
 sub put_token {
   my ($self, $token) = @_;
+  warn "token queue ", $self->name, " gets token $token\n";
   $self->croak("is full") if $self->is_full;
   my $was_empty = $self->is_empty;
   push @{$self->queue}, $token;

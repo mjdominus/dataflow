@@ -146,12 +146,13 @@ sub attach_output {
 # What's the node at the source end of this interface chain?
 sub source_node {
   my ($self, $interface_name) = @_;
-  die "unimplemented\n";
+  return $self->input_interface($interface_name);
 }
 
 sub target_node {
   my ($self, $interface_name) = @_;
-  die "unimplemented\n";
+  # TODO figure out how to snap token queue - interface chains
+  return $self->output_interface($interface_name);
 }
 
 sub schedule_prescheduled_components {
