@@ -92,7 +92,7 @@ sub build_scheduler {
   if (ref $factory eq "CODE") {
     $scheduler = $factory->($self);
   } elsif (ref $factory eq "") {
-    $factory = "Scheduler::$factory" unless $factory =~ /^Scheduler::/;
+    $factory = "Scheduler::$factory" unless $factory =~ /^Scheduler::/ || $factory =~ s/^\+//;
     $scheduler = $factory->new({ system => $self });
   } else {
     $scheduler = $factory->new({ system => $self });
