@@ -1,8 +1,8 @@
 package Node;
 use Moo;
-use namespace::clean;
 use Util;
 use Scalar::Util qw(reftype);
+use namespace::clean;
 
 #
 # A single primitive network such as an adder
@@ -22,24 +22,11 @@ has system => (
   required => 1,
 );
 
-has prototype => (
-  is => 'ro',
-  isa => sub { is_a($_[0], "Component")
-                 && $_[0]->is_primitive },
-  required => 1,
-);
-
 has name => (
   is => 'rw',
   isa => sub { defined($_[0]) && ! defined ref $_[0] },
-  lazy => 1,
-  builder => 1,
+  required => 1,
 );
-
-sub _build_name {
-  my ($self) = @_;
-  $self->prototype->generate_instance_name;
-}
 
 has handler => (
   is => 'ro',
