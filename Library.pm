@@ -13,6 +13,12 @@ has system => (
   required => 1,
 );
 
+has search_path => (
+  is => 'ro',
+  isa => sub { reftype $_[0] eq "ARRAY" },
+  default => sub { [ qw| ./component . | ] },
+);
+
 has catalog => (
   is => 'ro',
   isa => sub { reftype $_[0] eq 'HASH' },
@@ -69,7 +75,21 @@ sub build_catalog {
 my $instance_name_counter = 0;
 sub find_component {
   my ($self, $name) = @_;
-  return $self->catalog->{$name};
+  my $known = $self->catalog->{$name};
+  return $known if defined($known);
+  return $self->load_component($name);
+}
+
+sub load_component {
+  my ($self, $name) = @_;
+  for my $dir (@{$self->search_path}) {
+    my $file = "$dir/$name.ds";
+    if (-e $file) {
+      $self->system->load_file($name, $file);
+      return $self->catalog->{$name};
+    }
+  }
+  die "Unknown component type '$name'\n";
 }
 
 1;

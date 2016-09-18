@@ -51,12 +51,13 @@ has compiler => (
 );
 
 sub load_file {
-  my ($self, @args) = @_;
+  my ($self, $component_name, @args) = @_;
   my $component = $self->new_component({ primitive => 0,
-                                         name => 'ROOT',
+                                         name => $component_name,
                                          handler_generator => sub {},
                                        });
   $self->compiler->load_file($component, @args);
+  $self->library->add_component_specification($component_name, $component);
 
   my $network = $component->instantiate({
     instance_name => 'MAIN',
