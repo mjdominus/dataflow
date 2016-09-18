@@ -1,11 +1,11 @@
 package Component;
 use Moo;
-use namespace::clean;
 use Scalar::Util qw(reftype);
 use Carp 'croak';
 use Interface;
 use Network;
 use Node;
+use namespace::clean;
 
 # "Adder"
 has name => (
@@ -289,7 +289,7 @@ sub instantiate_node {
 
   my $node = $self->new_node({
     handler   => $self->make_handler_function(@{$opts->{handler_args} // []}),
-    prototype => $self,
+    name      => $opts->{name} // $self->generate_instance_name,
     system    => $opts->{system},
   });
 }

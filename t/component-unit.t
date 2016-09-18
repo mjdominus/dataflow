@@ -1,13 +1,11 @@
 #!/usr/bin/perl
 
+use Scalar::Util qw(reftype);
 use Test::More;
 use Test::Fatal;
-use Test::Deep;
-use Scalar::Util qw(reftype);
-
+use Test::Deep qw(!reftype); # Incompatible with Scalar::Util::reftype
 use Component;
 use t::lib::TestUtil;
-
 
 subtest handler_function => sub {
     subtest wants_arguments => sub {
@@ -111,6 +109,5 @@ subtest prescheduled => sub {
     ok(  $c->is_prescheduled("subcomponent2"));
     ok(! $c->is_prescheduled("subcomponent3"));
 };
-
 
 done_testing();
