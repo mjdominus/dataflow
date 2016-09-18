@@ -5,10 +5,14 @@ use Mock::Node;
 
 my $fake_node = Mock::Node->new();
 
+# $tokens is an initial queue of tokens
 sub new {
-  my ($class) = @_;
-  bless [] => $class;
+  my ($class, $tokens) = @_;
+  $tokens //= [];
+  bless [@$tokens] => $class;
 }
+
+sub name { "tokenqueue" }
 
 sub get_token {
   my ($self) = @_;
@@ -21,6 +25,8 @@ sub put_token {
   confess "full token queue" if $self->is_full;
   push @$self, $token
 }
+
+sub tokens { @{$_[0]} }
 
 sub is_empty { @{$_[0]} == 0 }
 sub is_full { @{$_[0]} == 5 }

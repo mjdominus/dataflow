@@ -170,6 +170,9 @@ sub make_output {
 # Token flow
 #
 
+# Current behavior is not-really-random
+# token queues are processed in hash order
+# and the first nonempty one has a token removed.
 sub merge {
   my ($self, $i, $o) = @_;
   my ($o_name) = keys %$o;
@@ -188,6 +191,10 @@ sub merge {
   $self->announce("nothing to merge");
 }
 
+#
+# This only runs if all the output queues
+# have room
+#
 sub split {
   my ($self, $i, $o) = @_;
   my ($i_name) = keys %$i;
@@ -208,6 +215,8 @@ sub split {
   }
 }
 
+# Sink sucks down all the tokens it can get
+# from every input, every time
 sub sink {
   my ($self, $i, $o) = @_;
   for my $in (values %$i) {
