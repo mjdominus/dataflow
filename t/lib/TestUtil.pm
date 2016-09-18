@@ -1,5 +1,12 @@
 package TestUtil;
-use Component;
+BEGIN {
+  unshift @INC, './t/lib';
+}
+
+# Need a mock system class
+sub a_system {
+  System->new({ scheduler_factory => 'Test' });
+}
 
 sub dummy_component {
   my ($name, $extra, $opts) = @_;
@@ -42,5 +49,10 @@ sub dummy_component {
 sub trivial_component {
   Component->new({ name => $_[0], is_primitive => 1, handler_generator => sub {} });
 }
+
+package Scheduler::Test;
+
+sub new { bless [ "Dummy Scheduler" ] => __PACKAGE__ }
+sub schedule { }
 
 1;
