@@ -1,8 +1,8 @@
 package Interface;
 use Moo;
-use namespace::clean;
 use Scalar::Util qw(reftype);
 use Util qw(is_a);
+use namespace::clean;
 
 has debug => (
   is => 'rw',

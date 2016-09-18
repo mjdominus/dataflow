@@ -1,13 +1,13 @@
 package System;
 use Moo;
 use Scalar::Util qw(reftype);
-use namespace::clean;
 use Library;
 use Compiler;
 use Network;
 use TokenQueue;
 use Scheduler::Queue;  # default scheduler
 use Util qw(is_a);
+use namespace::clean;
 
 has debug => (
   is => 'rw',

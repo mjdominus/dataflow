@@ -3,10 +3,10 @@ package Network;
 # Most of its behavior is in Component
 
 use Moo;
-use namespace::clean;
 use Scalar::Util qw(reftype);
 use Util;
 use Carp qw(croak confess);
+use namespace::clean;
 
 has debug => (
   is => 'rw',
