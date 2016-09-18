@@ -25,7 +25,7 @@ sub add_component_specification {
   if (exists $self->catalog->{$name}) {
     die "Duplicate component specification '$name' in library";
   }
-  $self->{catalog}->{$name} = $cs;
+  $self->catalog->{$name} = $cs;
 }
 
 has handler_class => (
