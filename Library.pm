@@ -7,6 +7,11 @@ use Handler;
 use Component;
 use Util;
 
+has debug => (
+  is => 'rw',
+  default => 0,
+);
+
 has system => (
   is => 'ro',
   isa => sub { is_a($_[0], "System") },
@@ -31,7 +36,7 @@ sub add_component_specification {
   if (exists $self->catalog->{$name}) {
     die "Duplicate component specification '$name' in library";
   }
-  warn "Library: adding spec for component $name\n";
+  $self->announce("adding spec for component $name");
   $self->catalog->{$name} = $cs;
 }
 
@@ -76,9 +81,9 @@ sub build_catalog {
 my $instance_name_counter = 0;
 sub find_component {
   my ($self, $name) = @_;
-  warn "Library: Looking for component '$name' in catalog\n";
+  $self->announce("Looking for component '$name' in catalog");
   my $known = $self->catalog->{$name};
-  warn "Library: Found component '$name' in catalog\n" if $known;
+  $self->announce("Found component '$name' in catalog") if $known;
   return $known if defined($known);
   return $self->load_component($name);
 }
@@ -88,12 +93,17 @@ sub load_component {
   for my $dir (@{$self->search_path}) {
     my $file = "$dir/$name.ds";
     if (-e $file) {
-      warn "Found component definition $name in $file\n";
+      $self->announce("Found component definition $name in $file");
       $self->system->load_file($name, $file);
       return $self->catalog->{$name};
     }
   }
   die "Unknown component type '$name'\n";
+}
+
+sub announce {
+  my ($self, @msg) = @_;
+  $self->system->announce("Library", @msg) if $self->debug;
 }
 
 1;
