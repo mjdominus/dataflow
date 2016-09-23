@@ -15,7 +15,6 @@ subtest activate_one_way => sub {
       my $odir = $dir eq "input" ? "output" : "input";
       my $if = Interface->new({ name => "test",
                                 system => TestUtil::a_system(),
-                                type => $dir,
                                 "activate_$dir\_function" => \&function,
                                 "activate_$odir\_function" => sub { die },
                               });
@@ -30,7 +29,6 @@ subtest activate_one_way => sub {
 subtest activate_two_ways => sub {
   my $if = Interface->new({ name => "test",
                             system => TestUtil::a_system(),
-                            type => "whatever",
                             "activate_input_function" => sub { die },
                             "activate_output_function" => sub { die },
                           });

@@ -320,16 +320,14 @@ sub instantiate_network {
 
   for my $interface_name (@{$self->inputs}) {
     $instance->add_input_interface($interface_name,
-                                   $self->new_interface({ type   => "input",
-                                                          name   => $interface_name,
+                                   $self->new_interface({ name   => $interface_name,
                                                           system => $system,
                                                         }));
   }
 
   for my $interface_name (@{$self->outputs}) {
     $instance->add_output_interface($interface_name,
-                                    $self->new_interface({ type   => "output",
-                                                           name   => $interface_name,
+                                    $self->new_interface({ name   => $interface_name,
                                                            system => $system,
                                                          }));
   }

@@ -33,13 +33,6 @@ has target => (
   predicate => 'target_is_known',
 );
 
-# Do we need this?
-has type => (
-  is => 'ro',
-  isa => sub { $_[0] =~ /\A (input | output) \z/x },
-  required => 1,
-);
-
 has activate_input_function => (
   is => 'ro',
   isa => sub { reftype $_[0] eq "CODE" },
