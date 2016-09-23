@@ -62,13 +62,12 @@ sub activate {
     }
   } elsif ($self->target) {
     if (! $self->target->is_full) {
-      $self->target->put_token($self->activate_input_function->($self));
-      $self->notify;
+      my $token = $self->activate_input_function->($self);
+      $self->target->put_token($token) if defined $token;
     }
   } elsif ($self->source) {
     if (! $self->source->is_empty) {
       $self->activate_output_function->($self, $self->source->get_token());
-      $self->notify;
     }
   } else {
     die $self->type;
@@ -82,8 +81,8 @@ sub activate_input {
   chomp(my $input = <STDIN>);
   return if $input eq "done";
   $self->notify;
-  return if $input eq "pass";
-  $self->target->put_token($input);
+  return if $input eq "pass" || $input eq "";
+  return $input;
 }
 
 sub activate_output {
