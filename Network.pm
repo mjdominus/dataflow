@@ -117,6 +117,11 @@ sub output_interface {
   $self->output_interfaces->{$name};
 }
 
+sub interface {
+  my ($self, $name) = @_;
+  $self->input_interface($name) || $self->output_interface($name);
+}
+
 sub announce {
   my ($self, @msg) = @_;
   return unless $self->debug;
@@ -124,35 +129,41 @@ sub announce {
 }
 
 sub attach_input {
-  my ($self, $q, $input_name) = @_;
+  my ($self, $q, $input_name, $direction) = @_;
+  defined $direction or confess "misssing direction";
+  $direction eq "source" or $direction eq "target"
+    or confess "bad direction '$direction'";
   defined $input_name or confess("no input name");
   my $interface = $self->input_interface($input_name)
     or die sprintf "Can't find input interface '%s' of network '%s'\n",
       $input_name, $self->name;
-  $interface->target($q);
+  $interface->$direction($q);
   return $interface;
 }
 
 sub attach_output {
-  my ($self, $q, $output_name) = @_;
+  my ($self, $q, $output_name, $direction) = @_;
+  defined $direction or confess "misssing direction";
+  $direction eq "source" or $direction eq "target"
+    or confess "bad direction '$direction'";
   defined $output_name or confess("no output name");
   my $interface = $self->output_interface($output_name)
     or die sprintf "Can't find output interface '%s' of network '%s'\n",
       $output_name, $self->name;
-  $interface->source($q);
+  $interface->$direction($q);
   return $interface;
 }
 
 # What's the node at the source end of this interface chain?
 sub source_node {
   my ($self, $interface_name) = @_;
-  return $self->input_interface($interface_name);
+  return $self->interface($interface_name);
 }
 
 sub target_node {
   my ($self, $interface_name) = @_;
   # TODO figure out how to snap token queue - interface chains
-  return $self->output_interface($interface_name);
+  return $self->interface($interface_name);
 }
 
 sub schedule_prescheduled_components {
@@ -211,24 +222,24 @@ sub build_wire {
   my $q = TokenQueue->new;
 
   if ($source->{direction}) {
-    my $attachment_point = $self->attach_input($q, $source->{own_interface});
+    my $attachment_point = $self->attach_input($q, $source->{own_interface}, "target");
     $q->source($attachment_point);
   } else {
     my $subnet = $self->subnetworks->{$source->{subnetwork}}
       or die "$source->{subnetwork}???";
     my $ifname = $source->{interface} // die "unimplemented";
-    $subnet->attach_output($q, $ifname);
+    $subnet->attach_output($q, $ifname, "target");
     $q->source($subnet->source_node($ifname));
   }
 
   if ($target->{direction}) {
-    my $attachment_point = $self->attach_output($q, $target->{own_interface});
+    my $attachment_point = $self->attach_output($q, $target->{own_interface}, "source");
     $q->target($attachment_point);
   } else {
     my $subnet = $self->subnetworks->{$target->{subnetwork}}
       or die "$target->{subnetwork}???";
     my $ifname = $target->{interface} // die "unimplemented";
-    $subnet->attach_input($q, $ifname);
+    $subnet->attach_input($q, $ifname, "source");
     $q->target($subnet->target_node($ifname));
   }
 
