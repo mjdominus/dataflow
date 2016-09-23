@@ -222,20 +222,29 @@ sub build_wire {
   my $q = TokenQueue->new;
 
   if ($source->{direction}) {
+    printf STDERR "#  Wiring internal interface %s to queue %s\n",
+      $source->{own_interface}, $q->name;
     my $attachment_point = $self->attach_input($q, $source->{own_interface}, "target");
     $q->source($attachment_point);
   } else {
+    printf STDERR "#  Wiring interface %s of subnetwork %s to queue %s\n",
+      $source->{interface}, $source->{subnetwork}, $q->name;
     my $subnet = $self->subnetworks->{$source->{subnetwork}}
       or die "$source->{subnetwork}???";
     my $ifname = $source->{interface} // die "unimplemented";
     $subnet->attach_output($q, $ifname, "target");
     $q->source($subnet->source_node($ifname));
+               # // die sprintf "sourceless queue attaching to attached node %s of subnet %s\n", $ifname, $subnet->name);
   }
 
   if ($target->{direction}) {
+    printf STDERR "#  Wiring queue %s to internal interface %s\n",
+      $q->name, $target->{own_interface};
     my $attachment_point = $self->attach_output($q, $target->{own_interface}, "source");
     $q->target($attachment_point);
   } else {
+    printf STDERR "#  Wiring queue %s to interface %s of subnetwork %s\n",
+      $q->name, $target->{interface}, $target->{subnetwork};
     my $subnet = $self->subnetworks->{$target->{subnetwork}}
       or die "$target->{subnetwork}???";
     my $ifname = $target->{interface} // die "unimplemented";
@@ -243,6 +252,7 @@ sub build_wire {
     $q->target($subnet->target_node($ifname));
   }
 
+  print STDERR "\n";
 }
 
 1;
