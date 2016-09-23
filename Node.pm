@@ -81,4 +81,19 @@ sub announce {
   $self->system->announce($self->name, @msg) if $self->debug;
 }
 
+sub trace {
+  my ($self, $opt) = @_;
+  my $I = " |" x ($opt->{depth}//0);
+  printf STDERR "* $I Node %s\n", $self->name;
+  my $if_hash = $opt->{direction} eq "target" ? $self->output : $self->input;
+  for my $if_name (sort keys %$if_hash) {
+    my $if = $if_hash->{$if_name};
+    my $I = " |" x (($opt->{depth}+1)//1);
+    printf STDERR "* $I port %s\n", $if_name;
+    $opt->{depth} += 2;
+    $if->trace($opt);
+    $opt->{depth} -= 2;
+  }
+}
+
 1;

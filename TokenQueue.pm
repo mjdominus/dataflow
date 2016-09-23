@@ -66,13 +66,16 @@ has target => (
   isa => sub { is_a($_[0], "Node") || is_a($_[0], "Interface") },
 );
 
-# For debugging; get rid of this later
-sub what_ho {
-  my ($self) = @_;
-  printf STDERR "TokenQueue %s reporting!\n\tSource is %s %s\n\tTarget is %s %s.\n",
-    $self->name,
-      ref($self->source), $self->source->name,
-      ref($self->target), $self->target->name;
+sub trace {
+  my ($self, $opt) = @_;
+  $DB::single=1;
+  my $I = " |" x ($opt->{depth}//0);
+  printf STDERR "* $I TokenQueue %s\n", $self->name;
+  my $t = $opt->{direction} eq "target" ? $self->target : $self->source;
+  unless ($t) { print STDERR "  $I dead end.\n"; return; }
+  $opt->{depth}++;
+  $t->trace($opt);
+  $opt->{depth}--;
 }
 
 1;

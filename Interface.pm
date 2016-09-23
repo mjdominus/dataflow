@@ -97,4 +97,15 @@ sub notify {
   $self->system->schedule($self);
 }
 
+sub trace {
+  my ($self, $opt) = @_;
+  my $I = " |" x ($opt->{depth}//0);
+  printf STDERR "* $I Interface %s\n", $self->name;
+  my $t = $opt->{direction} eq "target" ? $self->target : $self->source;
+  unless ($t) { print STDERR "  $I dead end.\n"; return; }
+  $opt->{depth}++;
+  $t->trace($opt);
+  $opt->{depth}--;
+}
+
 1;

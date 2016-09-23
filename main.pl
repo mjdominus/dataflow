@@ -27,6 +27,12 @@ for my $component (split /,\s*/, $opt{d}) {
   else                              { $system->component($component)->debug(1) }
 }
 
+$system->network->input_interface("main_in")->trace({ direction => "target" });
+$system->network->output_interface("main_out")->trace({ direction => "source" });
+$DB::single=1;
+1;
+1;
+
 $system->scheduler->announce_state;
 $system->run;
 
