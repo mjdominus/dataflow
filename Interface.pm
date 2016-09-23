@@ -54,10 +54,22 @@ has activate_output_function => (
 
 sub activate {
   my ($self) = @_;
-  if ($self->type eq "input") {
-    $self->activate_input_function->();
-  } elsif ($self->type eq "output") {
-    $self->activate_output_function->();
+
+  if ($self->source && $self->target) {
+    if (! $self->source->is_empty && ! $self->target->is_full) {
+      $self->target->put_token($self->source->get_token);
+      $self->notify;
+    }
+  } elsif ($self->target) {
+    if (! $self->target->is_full) {
+      $self->target->put_token($self->activate_input_function->($self));
+      $self->notify;
+    }
+  } elsif ($self->source) {
+    if (! $self->source->is_empty) {
+      $self->activate_output_function->($self, $self->source->get_token());
+      $self->notify;
+    }
   } else {
     die $self->type;
   }
@@ -75,9 +87,8 @@ sub activate_input {
 }
 
 sub activate_output {
-  my ($self) = @_;
+  my ($self, $token) = @_;
 
-  my $token = $self->source->get_token();
   print "** ", $self->name, ": $token\n";
 }
 
