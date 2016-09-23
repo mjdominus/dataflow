@@ -102,7 +102,7 @@ subtest distribute => sub {
       Handler::distribute(
         Mock::Node->new(),
         { input => $in, control => $control },
-        { output_t => $out[1], output_f => $out[0] });
+        { out_t => $out[1], out_f => $out[0] });
       ok($in->is_empty, "data input is empty");
       ok($control->is_empty, "control is empty");
       ok($out[1-$bool]->is_empty, "unselected output is empty");

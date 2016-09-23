@@ -257,7 +257,7 @@ sub distribute {
   my $control = $i->{control}->get_token();
   my $tok = $i->{input}->get_token();
 
-  $o->{$control ? 'output_t' : 'output_f'}->put_token($tok);
+  $o->{$control ? 'out_t' : 'out_f'}->put_token($tok);
 }
 
 

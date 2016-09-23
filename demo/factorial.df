@@ -34,10 +34,10 @@
 -  dec - m1cd - s1cd - lt[input1]
 -                      lt[output0] - testcd[control]
 -                 s1cd - testcd[input]
--  testcd[output_f] - trash
--  testcd[output_t] - s2cd - s2
--                     s2cd - deccd
--                   con1cd - deccd - m1cd
+-  testcd[out_f] - trash
+-  testcd[out_t] - s2cd - s2
+-                  s2cd - deccd
+-                con1cd - deccd - m1cd
 ################################################################
 
 -  input - s1 - m1 - mul
@@ -46,8 +46,8 @@
 -          s2 - mul - test[input]
 -          s2 - equals   - test[control]
 -       con1b - equals
-- test[output_f] - m1
-- test[output_t] - out
+- test[out_f] - m1
+- test[out_t] - out
 
 ! con0cd con1cd
 ! input con1a con1b
