@@ -2,6 +2,7 @@
 package Mock::TokenQueue;
 use Carp qw(confess croak);
 use Mock::Node;
+use strict;
 
 my $fake_node = Mock::Node->new();
 
@@ -25,6 +26,8 @@ sub put_token {
   confess "full token queue" if $self->is_full;
   push @$self, $token
 }
+
+sub peek_token { $_[0][0] }
 
 sub tokens { @{$_[0]} }
 
