@@ -50,6 +50,18 @@ has compiler => (
   default => sub { $_[0]->new_compiler({ system => $_[0], library => $_[0]->library }) },
 );
 
+sub initialize_network {
+  my ($self, $file) = @_;
+  my $component = $self->load_file('ROOT', $file);
+  my $network = $component->instantiate({
+    instance_name => 'MAIN',
+    system        => $self,
+  });
+  $self->_set_network($network);
+  $self->schedule_prescheduled_components();
+  return $self;
+}
+
 sub load_file {
   my ($self, $component_name, @args) = @_;
   my $component = $self->new_component({ primitive => 0,
@@ -59,14 +71,7 @@ sub load_file {
   $self->compiler->load_file($component, @args);
   $self->library->add_component_specification($component_name, $component);
 
-  my $network = $component->instantiate({
-    instance_name => 'MAIN',
-    system        => $self,
-  });
-
-  $self->_set_network($network);
-
-  return $self;
+  return $component;
 }
 
 has scheduler => (

@@ -18,7 +18,7 @@ has debug => (
 # Mainly for issuing announcements
 has system => (
   is => 'ro',
-  isa => sub { $DB::single=1; is_a($_[0], "System") },
+  isa => sub { is_a($_[0], "System") },
   required => 1,
 );
 

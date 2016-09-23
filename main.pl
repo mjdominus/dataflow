@@ -16,8 +16,7 @@ getopts('d:s:', \%opt) or usage();
 my ($input) = @ARGV;
 
 my $system = System->new({ scheduler_factory => $opt{s} });
-$system->load_file('ROOT', $input);
-$system->schedule_prescheduled_components();
+   $system->initialize_network($input);
 
 1;
 
