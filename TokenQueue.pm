@@ -22,10 +22,11 @@ has queue => (
   default => sub { [] },
 );
 
+my $x = "aaa";
 has name => (
   is => 'ro',
   isa => sub { defined $_[0] && not defined ref $_[0] },
-  default => sub { shift @names },
+  default => sub { shift(@names) || "queue_" . $x++ },
 );
 
 sub size { 0 + @{$_[0]->queue} }
@@ -56,13 +57,22 @@ sub get_token {
 }
 
 has source => (
-  is => 'ro',
-  isa => sub { is_a($_[0], "Component") },
+  is => 'rw',
+  isa => sub { is_a($_[0], "Node") || is_a($_[0], "Interface") },
 );
 
 has target => (
-  is => 'ro',
-  isa => sub { is_a($_[0], "Component") },
+  is => 'rw',
+  isa => sub { is_a($_[0], "Node") || is_a($_[0], "Interface") },
 );
+
+# For debugging; get rid of this later
+sub what_ho {
+  my ($self) = @_;
+  printf STDERR "TokenQueue %s reporting!\n\tSource is %s %s\n\tTarget is %s %s.\n",
+    $self->name,
+      ref($self->source), $self->source->name,
+      ref($self->target), $self->target->name;
+}
 
 1;

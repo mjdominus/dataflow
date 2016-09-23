@@ -1,0 +1,172 @@
+
+Components have the following properties:
+
+1.Boolean: whether they are initially scheduled
+2.Handler: run when activated, processes tokens
+3.Input port list with names
+(How to handle variable port lists like in the adder?)
+4.Output port list with names
+5.Activator predicate: hashes of ready ports, returns boolean
+stating whether to run the handler.
+6.Something about argument names?  Do this later.
+
+Say some network has
+
+name: component
+
+where'component' is not a primitive component.
+
+1.Take the component definition, loading if necessary
+2.Instantiate it  (something about arguments)
+This ought to recursively instantiate its subcomponents and
+their wires.
+3.Qualify the names of all its subcomponents and wires
+4.Load them into the system
+
+I think you need to think harder about component templates
+vs.component instances, and how components are instantiated.
+
+----------------------------------------------------------------
+
+Say network A contains B as a subcomponent.  Do we actually
+instantiate B into A and qualify all its names and so on?  And then
+the root network explicitly contains a ton of primitive components
+with names like 'A.B.foo.bar'?
+
+An alterative is that A only knows that it contains B without knowing
+anything about B's internal structure.  When a token appears on one of
+B's input queues, A just wakes up B to deal with it.  B then schedules
+its input networks.  If an input network is a primitive component, it
+gets run by the scheduler as usual; if it is a compound component then
+the scheduling proceeds recursively.
+
+Need some way of distinguishing compound networks from primitive
+(single-component) networks.  They should respond to some of the same
+methods, such as ->notify.   The latter are called NODES.
+
+->notify now takes an input port name.
+
+Need some way of distinguihsing between user input inputs and inputs
+that are on a network boundary.  It would be good (for debugging
+purposes etc.) if these were definde as identically as possible.
+That way you could test components in isolation and then plug them
+into a larger network unchanged.
+
+While you're doing all this rewriting, it's time to add a component
+testing API for unit tests to use.
+
+Maybe some sort of unification of input and output ports so that not
+everything has to be written twice?
+
+----------------------------------------------------------------
+
+1.Compiling a definition file should produce one
+  ComponentSpecification. This may recursively call the compiler to
+  compile required subcomponents.
+
+2.The root ComponentSpecification is instantiated.  This recursively
+  instantiates the subcomponents which includes connecting up the
+  wire.
+
+3.We're renaming ComponentSpecification to Component ComponentInstance
+  to Network The System as a root_network attribute that it runs.
+
+
+----------------------------------------------------------------
+
+# Methods
+
+
+## Network
+
+  ->notify(input => input_port)
+  ->notify(output => output_port)
+
+## Component
+
+  ->instantiate(name, { input_port_name => wire... },
+                      { output_port_name => wire... },
+                      { argument hash... } );
+
+     Wires here can be omitted, and then the ports become free input
+     and output nodes.
+
+     Returns a Network.
+
+  ->add_component
+  ->connect_components
+  ->add_input
+  ->add_ouput
+
+
+----------------------------------------------------------------
+
+
+Consider
+
+   define increment {  
+      = input num
+      = output num_plus_1
+      * con1 constant 1
+      * add adder
+      -   num  - adder - num_plus_1
+      -   con1 - adder
+   }
+
+When this kind of component gets
+
+    ->notify("input", "num")
+
+then what?  
+
+Wire sources and targets aren't components; they are ports.  Ports
+encasulate a network and an input or output name.
+
+Now let's connect together an increment and a decrement:
+
+   define silly {
+     = input  num
+     = output same_num
+     * i increment
+     * d decrement
+     -  num - i[num]
+     -  i[num_plus_1] - d[a_num]
+     -  d[a_num_minus_1] - same_num
+   }
+
+(In practice the port names are unambiguous and can be omitted.)
+
+This defines a network with an input and an output named num and same_num.
+Inputs and outputs are what exactly?  ???
+
+  Sometimes they are just names.
+  The names are attached to other inputs and outputs
+  OR to actual IO nodes.
+  Aren't they just attached to ports?
+  
+  For example, silly has an input named num.
+  What is num attached to?
+
+  At INSTANTIATION time we look at the wiring diagram and find that
+  the Interface 'num' is wired to a named Interface (could be input or
+  output) of some sub-NETWORK.  We can ask this NETWORK for the NODE
+  that its Interface ultimately represents.  If the Network is a Node,
+  the returned node is just the node itself.  Otherwise, the call
+  recurses.  The Interface records what NODE it is connected to.
+
+  When we connect two Interfaces whose nodes are both known, we make a
+  TokenQueue and wire together the nodes.  These Interfaces don't play
+  any further part.
+
+  Some Interfaces never do find out what Node they are attached to.
+  These do play a further part: They schedule themselves and act like
+  Nodes themselves.  (Input or output, as the case may be.)  So
+  Interfaces should compose some role shared by Node.  Handlers can be
+  embedded as special methods in the Interface object, instead of
+  plugged in from the Handlers module like for other Nodes.
+
+
+
+
+
+   

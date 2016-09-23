@@ -1,16 +1,27 @@
 package Library;
-# Registry of ComponentTypes
+# Registry of Components
 use Moo;
 use namespace::clean;
 use Scalar::Util qw(reftype);
 use Handler;
-use ComponentType;
+use Component;
 use Util;
+
+has debug => (
+  is => 'rw',
+  default => 0,
+);
 
 has system => (
   is => 'ro',
   isa => sub { is_a($_[0], "System") },
   required => 1,
+);
+
+has search_path => (
+  is => 'ro',
+  isa => sub { reftype $_[0] eq "ARRAY" },
+  default => sub { [ qw| ./component . | ] },
 );
 
 has catalog => (
@@ -25,7 +36,8 @@ sub add_component_specification {
   if (exists $self->catalog->{$name}) {
     die "Duplicate component specification '$name' in library";
   }
-  $self->{catalog}->{$name} = $cs;
+  $self->announce("adding spec for component $name");
+  $self->catalog->{$name} = $cs;
 }
 
 has handler_class => (
@@ -35,12 +47,12 @@ has handler_class => (
 
 has component_specification_factory => (
   is => 'ro',
-  default => sub { "ComponentType" },
+  default => sub { "Component" },
 );
 
 has component_factory => (
   is => 'ro',
-  default => sub { "Component" },
+  default => sub { "Network" },
 );
 
 sub build_catalog {
@@ -57,6 +69,7 @@ sub build_catalog {
     no strict 'refs';
     $catalog{$name} =
       $self->component_specification_factory->new({
+        is_primitive                      => 1,
         name                              => $name,
         handler_generator                 => $handler,
         handler_generator_wants_arguments => $wants_args,
@@ -66,16 +79,33 @@ sub build_catalog {
 }
 
 my $instance_name_counter = 0;
-sub make_component {
-  my ($self, $spec_name, $name, @handler_generator_arguments) = @_;
-  my $cs = $self->catalog->{$spec_name} or return;
-  my $component = $self->component_factory
-    ->new({ prototype => $cs,
-            system => $self->system,
-            handler_generator_arguments => \@handler_generator_arguments,
-            instance_name => $name,
-           });
-  return $component;
+sub find_component {
+  my ($self, $name) = @_;
+  $self->announce("Looking for component '$name' in catalog");
+  my $known = $self->catalog->{$name};
+  $self->announce("Found component '$name' in catalog") if $known;
+  return $known if defined($known);
+  return $self->load_component($name);
+}
+
+sub load_component {
+  my ($self, $name) = @_;
+  for my $dir (@{$self->search_path}) {
+    my $file = "$dir/$name.ds";
+    if (-e $file) {
+      $self->announce("Found component definition $name in $file");
+      $self->system->load_file($name, $file);
+      return $self->catalog->{$name};
+    }
+  }
+  die "Unknown component type '$name'\n";
+}
+
+sub announce {
+  my ($self, @msg) = @_;
+  $self->system->announce("Library", @msg) if $self->debug;
 }
 
 1;
+__DATA__
+

@@ -1,8 +1,9 @@
 
-* in:    input input
+= input in
+= output out
+
 * three: constant 3
 * add:   adder
-* out:   output output
 
 - in - add - out
 - three[output0] - add

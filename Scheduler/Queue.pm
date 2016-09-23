@@ -22,7 +22,7 @@ has agenda => (
 
 has queue_type => (
   is => 'rw',
-  isa => sub { /^(fifo|lifo|random)$/i },
+  isa => sub { $_[0] =~ /^(fifo|lifo|random)$/i },
   default => sub { 'lifo' },
 );
 
