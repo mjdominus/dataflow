@@ -1,0 +1,74 @@
+# Primitive node specifications
+
+# name: (string, required)
+# reqs_args": (boolean, default false)
+# handler: name of handler function; defaults to Handler::name or Handler::make_name
+# autoschedule: (boolean, default false)
+# next_input_name: name of function, required
+# next_output_name: name of function, required
+#   (or lists of names?  do that in the next version)
+#   (unqualified names are taken to be names of functions in PortNames)
+
+name: constant
+reqs_args: 1
+nin: none
+non: many_out
+autoschedule: 1
+
+name: adder
+nin: many_in
+# This doesn't express that the output may be named anything
+# but maybe we can deal with that in the future, or get rid of that feature
+non: one_out
+
+name: subtracter
+nin: two_in
+non: one_out
+
+name: multiplier
+nin: many_in
+non: one_out
+
+name: divider
+nin: two_in
+non: one_out
+
+name: comparator
+reqs_args: 1
+nin: two_in
+non: one_out
+
+name: input
+reqs_args: 1
+nin: none
+non: one_out
+autoschedule: 1
+
+name: output
+reqs_args: 1
+nin: one_in
+non: none
+
+name: merge
+nin: many_in
+non: one_out
+
+name: split
+nin: one_in
+non: many_out
+
+name: sink
+nin: one_in
+non: out
+
+name: select
+nin: select_in
+non: one_out
+
+name: distribute
+nin: distribute_in
+non: distribute_out
+
+
+
+
