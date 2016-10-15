@@ -1,4 +1,6 @@
 package TestUtil;
+use Component::Compound;
+use Component::Primitive;
 
 BEGIN {
   unshift @INC, './t/lib';
@@ -28,7 +30,7 @@ sub primitive_component {
 sub compound_component {
   my ($name, $extra, $opts) = @_;
 
-  my $c = Component::Primitive->new({
+  my $c = Component::Compound->new({
     name => $name,
     %$extra,
   });
@@ -36,13 +38,13 @@ sub compound_component {
   if ($opts->{inputs}) {
     my $in = ref $opts->{inputs} ? $opts->{inputs}
       : [ map { "input$_" } (1 .. $opts->{inputs}) ];
-    $c->add_input($_) for @$in;
+    $c->add_input_interface($_) for @$in;
   }
 
   if ($opts->{outputs}) {
     my $in = ref $opts->{outputs} ? $opts->{outputs}
       : [ map "output$_", 1 .. $opts->{outputs} ];
-    $c->add_output($_) for @$in;
+    $c->add_output_interface($_) for @$in;
   }
 
   if ($opts->{prescheduled}) {
@@ -60,7 +62,7 @@ sub compound_component {
 }
 
 sub trivial_component {
-  Component->new({ name => $_[0], is_primitive => 1, handler_generator => sub {} });
+  Component::Primitive->new({ name => $_[0], handler_generator => sub {} });
 }
 
 1;
