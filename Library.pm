@@ -1,9 +1,10 @@
 package Library;
-# Registry of Components
+# Registry of components
 use Moo;
 use namespace::clean;
 use Scalar::Util qw(reftype);
 use Component::Primitive;
+use Component::Compound;
 use Handler;
 use Util;
 
