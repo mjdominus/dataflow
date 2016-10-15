@@ -11,15 +11,25 @@ sub a_system {
   System->new({ scheduler_factory => 'Test' });
 }
 
-sub dummy_component {
+sub primitive_component {
   my ($name, $extra, $opts) = @_;
   $extra //= {};
   $opts //= {};
 
-  my $c = Component->new({
+  my $c = Component::Primitive->new({
     name => $name,
-    is_primitive => 0,
     handler_generator => sub {},
+    %$extra,
+  });
+
+  return $c;
+}
+
+sub compound_component {
+  my ($name, $extra, $opts) = @_;
+
+  my $c = Component::Primitive->new({
+    name => $name,
     %$extra,
   });
 
