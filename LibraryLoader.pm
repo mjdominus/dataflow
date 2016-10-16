@@ -8,11 +8,6 @@ has handler_class => (
   default => sub { "Handler" },
 );
 
-has port_name_class => (
-  is => 'ro',
-  default => sub { "PortNames" },
-);
-
 has fh => (
   is => 'rwp',
   predicate => 'fh_open',
@@ -67,14 +62,13 @@ sub next_primitive_spec {
 sub para_to_spec {
   my ($self, $para) = @_;
 
-  # now fill in missing defaults from spec
+  # check for required items
   for my $req (qw / name nin non / ) {
     die "Paragraph missing required '$req' item\n" # fix: better message for this later
       unless $para->{$req};
   }
 
-  $self->_qualify($para, $_, $self->port_name_class) for qw/ nin non /;
-
+  # now fill in missing defaults from spec
   $para->{reqs_args}    //= 0;
   $para->{autoschedule} //= 0;
 
@@ -84,6 +78,8 @@ sub para_to_spec {
   return $para;
 }
 
+# Maybe you can get rid of this for handler functions like you did for
+# portname functions.
 sub _qualify {
   my ($self, $spec, $key, $def_package) = @_;
   return if $spec->{$key} =~ /::/; # already qualified

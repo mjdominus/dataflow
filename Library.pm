@@ -50,6 +50,30 @@ has primitive_component_factory => (
   default => sub { "Component::Primitive" },
 );
 
+has port_name_class => (
+  is => 'ro',
+  default => sub { "PortNames" },
+);
+
+has library_loader_factory => (
+  is => 'ro',
+  default => sub { "LibraryLoader" },
+);
+
+has component_library_file => (
+  is => 'ro',
+  default => "library.lib",
+);
+
+has library_loader => (
+  is => 'ro',
+  default => sub {
+    $DB::single=1;
+    $_[0]->library_loader_factory
+                     ->new({ handler_class => $_[0]->handler_class }) },
+  lazy => 1,
+);
+
 sub build_catalog {
   my ($self) = @_;
   my %catalog;
@@ -70,6 +94,34 @@ sub build_catalog {
       });
   }
   return \%catalog;
+}
+
+# convert the spec to an argument hash for Component
+sub spec_to_component_args {
+  my ($self, $spec) = @_;
+  my %args;
+
+  $args{handler_generator_wants_arguments} = $spec->{reqs_args};
+  $args{handler_generator}     = $self->_resolve_func($spec->{handler});
+  $args{always_autoschedule}   = $spec->{autoschedule};
+  $args{input_port_namespace}  = $self->port_name_class->namespace($spec->{nin});
+  $args{output_port_namespace} = $self->port_name_class->namespace($spec->{non});
+  $args{name}                  = $spec->{name};
+
+  return \%args;
+}
+
+# Convert function name to function reference if possible
+sub _resolve_func {
+  my ($self, $func_name) = @_;
+  my $func = do {
+    no strict 'refs';
+    if (defined &$func_name) {
+      \&$func_name;
+    } else {
+      die "Can't resolve function '$func_name'";
+    }};
+  return $func;
 }
 
 my $instance_name_counter = 0;
@@ -101,5 +153,3 @@ sub announce {
 }
 
 1;
-__DATA__
-

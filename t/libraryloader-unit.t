@@ -19,8 +19,8 @@ subtest para_to_spec => sub {
 
   cmp_deeply($ll->para_to_spec({%p}),
              { name => "name",
-               nin => "PortNames::nin",
-               non => "PortNames::non",
+               nin => "nin",
+               non => "non",
                autoschedule => 0,
                reqs_args => 0,
                handler => "Handler::name",
@@ -29,8 +29,8 @@ subtest para_to_spec => sub {
 
   cmp_deeply($ll->para_to_spec({%p, reqs_args => 1}),
              { name => "name",
-               nin => "PortNames::nin",
-               non => "PortNames::non",
+               nin => "nin",
+               non => "non",
                autoschedule => 0,
                reqs_args => 1,
                handler => "Handler::make_name",
@@ -40,7 +40,7 @@ subtest para_to_spec => sub {
   cmp_deeply($ll->para_to_spec({%p, nin => "A::B", non => "C" }),
              { name => "name",
                nin => "A::B",
-               non => "PortNames::C",
+               non => "C",
                autoschedule => 0,
                reqs_args => 0,
                handler => "Handler::name",
@@ -49,8 +49,8 @@ subtest para_to_spec => sub {
 
   cmp_deeply($ll->para_to_spec({%p, handler => "E::F"}),
              { name => "name",
-               nin => "PortNames::nin",
-               non => "PortNames::non",
+               nin => "nin",
+               non => "non",
                autoschedule => 0,
                reqs_args => 0,
                handler => "E::F",
@@ -73,8 +73,8 @@ subtest next_primitive_spec => sub {
     my $ll = LibraryLoader->new({ fh => $ifh }) or die;
     my $spec = $ll->next_primitive_spec;
     cmp_deeply($spec, superhashof({ name => "this",
-                                    nin => "PortNames::that",
-                                    non => "PortNames::other",
+                                    nin => "that",
+                                    non => "other",
                                   }));
   }
 };
