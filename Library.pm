@@ -3,8 +3,8 @@ package Library;
 use Moo;
 use namespace::clean;
 use Scalar::Util qw(reftype);
+use Component::Primitive;
 use Handler;
-use Component;
 use Util;
 
 has debug => (
@@ -31,10 +31,10 @@ has catalog => (
   lazy => 1,
 );
 
-sub add_component_specification {
+sub add_component {
   my ($self, $name, $cs) = @_;
   if (exists $self->catalog->{$name}) {
-    die "Duplicate component specification '$name' in library";
+    die "Duplicate component '$name' in library";
   }
   $self->announce("adding spec for component $name");
   $self->catalog->{$name} = $cs;
@@ -45,14 +45,9 @@ has handler_class => (
   default => sub { "Handler" },
 );
 
-has component_specification_factory => (
+has primitive_component_factory => (
   is => 'ro',
-  default => sub { "Component" },
-);
-
-has component_factory => (
-  is => 'ro',
-  default => sub { "Network" },
+  default => sub { "Component::Primitive" },
 );
 
 sub build_catalog {
@@ -68,8 +63,7 @@ sub build_catalog {
     }
     no strict 'refs';
     $catalog{$name} =
-      $self->component_specification_factory->new({
-        is_primitive                      => 1,
+      $self->primitive_component_factory->new({
         name                              => $name,
         handler_generator                 => $handler,
         handler_generator_wants_arguments => $wants_args,
