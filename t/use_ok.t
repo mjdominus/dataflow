@@ -5,6 +5,7 @@ my @modules = qw| Compiler
                   Component::Compound Component::Primitive
                   Handler Interface
                   LibraryLoader Library
+                  Namespace::NameList Namespace::NamePrefix
                   Network Node PortNames
                   Scheduler::Queue System TokenQueue Util
                 |;
