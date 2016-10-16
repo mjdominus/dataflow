@@ -1,6 +1,6 @@
 package Network;
-# Single INSTANCE of a component
-# Most of its behavior is in Component
+# Single INSTANCE of a compound component
+# Most of its behavior is in Component::Compound
 
 use Moo;
 use Scalar::Util qw(reftype);
@@ -22,7 +22,7 @@ has system => (
 has prototype => (
   is => 'ro',
   required => 1,
-  isa => sub { is_a($_[0], 'Component') },
+  isa => sub { is_a($_[0], 'Component::Compound') },
   handles => [ qw/ is_primitive is_prescheduled / ],
 );
 

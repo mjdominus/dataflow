@@ -27,9 +27,9 @@ has library => (
   lazy => 1,
 );
 
-has component_factory => (
+has compound_component_factory => (
   is => 'ro',
-  default => sub { "Component" },
+  default => sub { "Component::Compound" },
   handles => { new_component => 'new' },
 );
 
@@ -64,10 +64,7 @@ sub initialize_network {
 
 sub load_file {
   my ($self, $component_name, @args) = @_;
-  my $component = $self->new_component({ primitive => 0,
-                                         name => $component_name,
-                                         handler_generator => sub {},
-                                       });
+  my $component = $self->new_component({ name => $component_name });
   $self->compiler->load_file($component, @args);
   $self->library->add_component_specification($component_name, $component);
 

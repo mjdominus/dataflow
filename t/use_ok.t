@@ -1,13 +1,18 @@
 #!/usr/bin/perl
 
 use Test::More;
-my @modules = qw| Compiler Component Handler Interface
-                  Library Network Node Scheduler/Queue
-                  System TokenQueue Util
+my @modules = qw| Compiler
+                  Component::Compound Component::Primitive
+                  Handler Interface
+                  LibraryLoader Library
+                  Namespace::NameList Namespace::NamePrefix
+                  Network Node PortNames
+                  Scheduler::Queue System TokenQueue Util
                 |;
 
 for my $module (@modules) {
-  my $file = "$module.pm";
+  my $file = $module =~ s|::|/|gr;
+  $file = "$file.pm";
   ok(eval { require $file }, $module);
 }
 

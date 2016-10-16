@@ -1,10 +1,11 @@
 package Library;
-# Registry of Components
+# Registry of components
 use Moo;
 use namespace::clean;
 use Scalar::Util qw(reftype);
+use Component::Primitive;
+use Component::Compound;
 use Handler;
-use Component;
 use Util;
 
 has debug => (
@@ -31,10 +32,10 @@ has catalog => (
   lazy => 1,
 );
 
-sub add_component_specification {
+sub add_component {
   my ($self, $name, $cs) = @_;
   if (exists $self->catalog->{$name}) {
-    die "Duplicate component specification '$name' in library";
+    die "Duplicate component '$name' in library";
   }
   $self->announce("adding spec for component $name");
   $self->catalog->{$name} = $cs;
@@ -45,14 +46,33 @@ has handler_class => (
   default => sub { "Handler" },
 );
 
-has component_specification_factory => (
+has primitive_component_factory => (
   is => 'ro',
-  default => sub { "Component" },
+  default => sub { "Component::Primitive" },
 );
 
-has component_factory => (
+has port_name_class => (
   is => 'ro',
-  default => sub { "Network" },
+  default => sub { "PortNames" },
+);
+
+has library_loader_factory => (
+  is => 'ro',
+  default => sub { "LibraryLoader" },
+);
+
+has component_library_file => (
+  is => 'ro',
+  default => "library.lib",
+);
+
+has library_loader => (
+  is => 'ro',
+  default => sub {
+    $DB::single=1;
+    $_[0]->library_loader_factory
+                     ->new({ handler_class => $_[0]->handler_class }) },
+  lazy => 1,
 );
 
 sub build_catalog {
@@ -68,14 +88,41 @@ sub build_catalog {
     }
     no strict 'refs';
     $catalog{$name} =
-      $self->component_specification_factory->new({
-        is_primitive                      => 1,
+      $self->primitive_component_factory->new({
         name                              => $name,
         handler_generator                 => $handler,
         handler_generator_wants_arguments => $wants_args,
       });
   }
   return \%catalog;
+}
+
+# convert the spec to an argument hash for Component
+sub spec_to_component_args {
+  my ($self, $spec) = @_;
+  my %args;
+
+  $args{handler_generator_wants_arguments} = $spec->{reqs_args};
+  $args{handler_generator}     = $self->_resolve_func($spec->{handler});
+  $args{always_autoschedule}   = $spec->{autoschedule};
+  $args{input_port_namespace}  = $self->port_name_class->namespace($spec->{nin});
+  $args{output_port_namespace} = $self->port_name_class->namespace($spec->{non});
+  $args{name}                  = $spec->{name};
+
+  return \%args;
+}
+
+# Convert function name to function reference if possible
+sub _resolve_func {
+  my ($self, $func_name) = @_;
+  my $func = do {
+    no strict 'refs';
+    if (defined &$func_name) {
+      \&$func_name;
+    } else {
+      die "Can't resolve function '$func_name'";
+    }};
+  return $func;
 }
 
 my $instance_name_counter = 0;
@@ -107,5 +154,3 @@ sub announce {
 }
 
 1;
-__DATA__
-
