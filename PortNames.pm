@@ -1,42 +1,42 @@
 package PortNames;
 use Moo;
+use Namespace::NameList;
+use Namespace::NamePrefix;
+use Carp qw(croak);
 use namespace::clean;
-use List::Util qw(first);
+
 
 sub none { return }
 
-*many_out = some("output");
-*many_in = some("input");
+my %namespace = (
+  many_out => _prefix("output"),
+  many_in => _prefix("input"),
 
-*one_out = list("output");
-*one_in = list("input0");
-*two_in = list("input0", "input1");
+  one_out => _list("output"),
+  one_in => _list("input0"),
+  two_in => _list("input0", "input1"),
 
-*select_in = list("control", "in_t", "in_f");
+  select_in => _list("control", "in_t", "in_f"),
 
-*distribute_in = list("control", "input");
-*distribute_out = list("out_t", "out_f");
+  distribute_in => _list("control", "input"),
+  distribute_out => _list("out_t", "out_f"),
+);
 
-sub some {
+sub _prefix {
   my ($prefix) = @_;
-  return sub {
-    my @used;
-    for my $name (@_) {
-      if ($name =~ /\A \Q$prefix\E (\d+) /x) {
-        $used[$1] = 1;
-      }
-    }
-    my $unused = first { ! $used[$_] } 0 .. 0+@used;
-    return "$prefix$unused";
-  };
+  Namespace::NamePrefix->new({ prefix => $prefix });
 }
 
-sub list {
-  my @item = @_;
-  return sub {
-    my %seen = map { $_ => 1 } @_;
-    return first { ! $seen{$_} } @item;
-  };
+sub _list {
+  my (@name_list) = @_;
+  Namespace::NameList->new({ name_list => \@name_list });
+}
+
+sub namespace {
+  my ($class, $name) = @_;
+  croak "Unknown portname specification '$name'"
+    unless exists $namespace{$name};
+  return $namespace{$name};
 }
 
 1;
