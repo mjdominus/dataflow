@@ -50,16 +50,36 @@ sub instantiate {
   });
 }
 
-# XXX Dummy -- fix this once you merge this with default-port branch
+has input_port_namespace => (
+  is => 'ro',
+  isa => sub { $_[0]->can("next_valid") && $_[0]->can("is_valid") },
+  # required => 1,                  # XXX FIX THIS
+);
+
 sub has_input_port {
   my ($self, $name) = @_;
-  $name =~ /\A input \d+ \z/x;
+  $self->input_port_namespace->is_valid($name);
 }
 
-# XXX Dummy -- fix this once you merge this with default-port branch
+sub next_input_port {
+  my ($self) = @_;
+  $self->input_port_namespace->next_valid($self->connected_input_ports);
+}
+
+has output_port_namespace => (
+  is => 'ro',
+  isa => sub { $_[0]->can("next_valid") && $_[0]->can("is_valid") },
+  # required => 1,                  # XXX FIX THIS
+);
+
 sub has_output_port {
   my ($self, $name) = @_;
-  $name =~ /\A output \d+ \z/x;
+  $self->output_port_namespace->is_valid($name);
+}
+
+sub next_output_port {
+  my ($self) = @_;
+  $self->output_port_namespace->next_valid($self->connected_output_ports);
 }
 
 sub has_port {

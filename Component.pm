@@ -25,5 +25,4 @@ sub generate_instance_name {
     ++$self->instance_counter->{$self->name}
 }
 
-
 1;

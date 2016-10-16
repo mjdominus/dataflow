@@ -1,6 +1,7 @@
 package TestUtil;
 use Component::Compound;
 use Component::Primitive;
+use PortNames;
 
 BEGIN {
   unshift @INC, './t/lib';
@@ -21,6 +22,8 @@ sub primitive_component {
   my $c = Component::Primitive->new({
     name => $name,
     handler_generator => sub {},
+    input_port_namespace => PortNames::_prefix("input"),
+    output_port_namespace => PortNames::_prefix("output"),
     %$extra,
   });
 
